@@ -1,0 +1,36 @@
+{
+  "_comment": "Claude Desktop / any MCP host config. Each entry is one role-scoped connector: same server binary, different bearer token + graph. Replace tokens with the values from your .env and the URL with your hosted Omnigraph if remote.",
+  "mcpServers": {
+    "analytos-brain-content": {
+      "command": "npx",
+      "args": ["-y", "@modernrelay/omnigraph-mcp"],
+      "env": {
+        "OMNIGRAPH_BASE_URL": "http://127.0.0.1:8080",
+        "OMNIGRAPH_GRAPH_ID": "knowledge",
+        "OMNIGRAPH_DEFAULT_BRANCH": "main",
+        "OMNIGRAPH_TOKEN": "<paste OMNIGRAPH_TOKEN_CONTENT>"
+      }
+    },
+    "analytos-brain-gtm": {
+      "command": "npx",
+      "args": ["-y", "@modernrelay/omnigraph-mcp"],
+      "env": {
+        "OMNIGRAPH_BASE_URL": "http://127.0.0.1:8080",
+        "OMNIGRAPH_GRAPH_ID": "knowledge",
+        "OMNIGRAPH_DEFAULT_BRANCH": "main",
+        "OMNIGRAPH_TOKEN": "<paste OMNIGRAPH_TOKEN_GTM>"
+      }
+    },
+    "analytos-brain-reviewer-comms": {
+      "_comment": "Humans only. The reviewer token can also read the comms graph.",
+      "command": "npx",
+      "args": ["-y", "@modernrelay/omnigraph-mcp"],
+      "env": {
+        "OMNIGRAPH_BASE_URL": "http://127.0.0.1:8080",
+        "OMNIGRAPH_GRAPH_ID": "comms",
+        "OMNIGRAPH_DEFAULT_BRANCH": "main",
+        "OMNIGRAPH_TOKEN": "<paste OMNIGRAPH_TOKEN_REVIEWER>"
+      }
+    }
+  }
+}

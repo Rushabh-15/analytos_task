@@ -1,0 +1,39 @@
+# Declarative Cedar tests for the COMMS graph — the "agents can never see
+# EmailThread nodes" guarantee, black-box tested.
+# Run: omnigraph policy test --cluster cluster --graph comms --tests cluster/policies/comms.tests.yaml
+version: 1
+cases:
+  - id: content-agent-blocked-from-comms
+    actor: act-content
+    action: read
+    branch: main
+    expect: deny
+  - id: gtm-agent-blocked-from-comms
+    actor: act-gtm
+    action: read
+    branch: main
+    expect: deny
+  - id: content-agent-cannot-invoke-comms-queries
+    actor: act-content
+    action: invoke_query
+    expect: deny
+  - id: gtm-agent-cannot-export-comms
+    actor: act-gtm
+    action: export
+    branch: main
+    expect: deny
+  - id: reviewer-reads-comms
+    actor: act-reviewer
+    action: read
+    branch: main
+    expect: allow
+  - id: ingest-writes-comms-branch
+    actor: act-ingest
+    action: change
+    branch: ingest/run-001
+    expect: allow
+  - id: ingest-cannot-merge-comms-to-main
+    actor: act-ingest
+    action: branch_merge
+    target_branch: main
+    expect: deny

@@ -1,0 +1,46 @@
+// Retrieval — hybrid (vector + BM25 + RRF) over chunks, plus entity search.
+
+query hybrid_chunks($q: String) @description("Hybrid retrieval: Reciprocal Rank Fusion of semantic nearest-neighbour and BM25 over document chunks. The default context-assembly query.") {
+    match { $c: Chunk }
+    return { $c.slug, $c.text, $c.doc_slug, $c.chunk_index }
+    order { rrf(nearest($c.embedding, $q), bm25($c.text, $q)) }
+    limit 12
+}
+
+query semantic_chunks($q: String) @description("Pure vector nearest-neighbour over chunk embeddings.") {
+    match { $c: Chunk }
+    return { $c.slug, $c.text, $c.doc_slug }
+    order { nearest($c.embedding, $q) }
+    limit 10
+}
+
+query keyword_chunks($q: String) @description("Pure BM25 full-text ranking over chunk text.") {
+    match { $c: Chunk }
+    return { $c.slug, $c.text, $c.doc_slug }
+    order { bm25($c.text, $q) }
+    limit 10
+}
+
+query search_products($q: String) @description("Full-text search over product names.") {
+    match {
+        $p: Product
+        search($p.name, $q)
+    }
+    return { $p.slug, $p.name, $p.tagline }
+}
+
+query search_proofpoints($q: String) @description("Full-text search over proof-point claims.") {
+    match {
+        $pp: ProofPoint
+        search($pp.claim, $q)
+    }
+    return { $pp.slug, $pp.claim, $pp.metric_value, $pp.unit, $pp.client_safe }
+}
+
+query search_segments($q: String) @description("Full-text search over ICP segment names.") {
+    match {
+        $s: ICPSegment
+        search($s.name, $q)
+    }
+    return { $s.slug, $s.name, $s.description }
+}

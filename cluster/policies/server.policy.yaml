@@ -1,0 +1,13 @@
+# Cedar policy — cluster (server) level.
+# Gates GET /graphs (topology listing). Graph NAMES are not sensitive;
+# graph CONTENT is gated per-graph above.
+version: 1
+
+groups:
+  everyone: [act-admin, act-reviewer, act-ingest, act-content, act-gtm]
+
+rules:
+  - id: everyone-can-list-graphs
+    allow:
+      actors: { group: everyone }
+      actions: [graph_list]

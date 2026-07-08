@@ -1,0 +1,126 @@
+{
+  "doc_type": "product_doc",
+  "title": "Stockly — Product Overview",
+  "products": [
+    {
+      "name": "Stockly",
+      "tagline": "Demand forecasting and auto-replenishment for perishable retail.",
+      "description": "AI inventory copilot for grocery and convenience retail. Ingests POS transactions, supplier lead times, weather and local-event signals to produce SKU-store level demand forecasts and draft purchase orders approved in one click.",
+      "category": "Retail inventory optimization",
+      "stage": "live",
+      "website": "https://analytos.ai/stockly"
+    }
+  ],
+  "features": [
+    {
+      "product": "Stockly",
+      "name": "Perishable-aware forecasting",
+      "description": "Shelf-life decay curves per SKU; optimizes for sell-through before expiry, not just stock availability.",
+      "differentiator": true
+    },
+    {
+      "product": "Stockly",
+      "name": "One-click replenishment",
+      "description": "Draft POs generated nightly per store with supplier constraints (MOQs, delivery windows) already applied.",
+      "differentiator": false
+    },
+    {
+      "product": "Stockly",
+      "name": "Markdown optimizer",
+      "description": "Suggests dynamic discount timing for items approaching expiry to recover margin instead of writing off waste.",
+      "differentiator": false
+    },
+    {
+      "product": "Stockly",
+      "name": "Shrink analytics",
+      "description": "Attributes waste to root causes (over-ordering, delivery variance, planogram gaps) with store-level league tables.",
+      "differentiator": false
+    }
+  ],
+  "proof_points": [
+    {
+      "product": "Stockly",
+      "feature": "Perishable-aware forecasting",
+      "claim": "Reduced fresh-produce waste at a mid-market US grocery chain",
+      "metric_name": "waste_reduction",
+      "metric_value": "38%",
+      "numeric_value": 38,
+      "unit": "percent",
+      "timeframe": "12-week pilot, 12 stores",
+      "evidence_type": "pilot_result",
+      "context": "Fresh-produce waste versus pre-pilot baseline.",
+      "client_safe": true
+    },
+    {
+      "product": "Stockly",
+      "feature": "Perishable-aware forecasting",
+      "claim": "Improved forecast error (WMAPE) from 41% to 22% at SKU-store level",
+      "metric_name": "wmape",
+      "metric_value": "41% → 22%",
+      "numeric_value": 22,
+      "unit": "percent WMAPE",
+      "timeframe": "12-week pilot",
+      "evidence_type": "pilot_result",
+      "context": "Measured against the chain's incumbent ordering process.",
+      "client_safe": true
+    },
+    {
+      "product": "Stockly",
+      "feature": "One-click replenishment",
+      "claim": "Saved store teams 9.4 hours per week on manual ordering",
+      "metric_name": "hours_saved_per_week",
+      "metric_value": "9.4",
+      "numeric_value": 9.4,
+      "unit": "hours/week per store",
+      "timeframe": "12-week pilot",
+      "evidence_type": "pilot_result",
+      "context": "Self-reported by store teams during the pilot.",
+      "client_safe": true
+    },
+    {
+      "product": "Stockly",
+      "feature": "One-click replenishment",
+      "claim": "Cut stockout rate on top-200 SKUs by 27%",
+      "metric_name": "stockout_reduction",
+      "metric_value": "27%",
+      "numeric_value": 27,
+      "unit": "percent",
+      "timeframe": "12-week pilot",
+      "evidence_type": "pilot_result",
+      "context": "Top-200 SKUs by revenue.",
+      "client_safe": true
+    },
+    {
+      "product": "Stockly",
+      "feature": null,
+      "claim": "Typical deployment onboards in under 2 weeks",
+      "metric_name": "onboarding_time",
+      "metric_value": "<2 weeks",
+      "numeric_value": 2,
+      "unit": "weeks",
+      "timeframe": null,
+      "evidence_type": "internal_estimate",
+      "context": "Reads standard POS exports; no ERP integration required for phase 1.",
+      "client_safe": true
+    }
+  ],
+  "segments": [],
+  "personas": [],
+  "competitors": [
+    {
+      "product": "Stockly",
+      "name": "ForecastIQ",
+      "notes": "Legacy demand planner; forecasts at warehouse level and ignores expiry dynamics.",
+      "displacement_angle": "Perishables-first, SKU-store level modeling with speed-to-value for mid-market chains."
+    },
+    {
+      "product": "Stockly",
+      "name": "ShelfSense",
+      "notes": "Warehouse-level forecasting without expiry awareness.",
+      "displacement_angle": "Expiry-aware forecasting plus replenishment, live in weeks."
+    }
+  ],
+  "people": [],
+  "decisions": [],
+  "thread": null
+}

@@ -1,0 +1,66 @@
+// ─────────────────────────────────────────────────────────────
+// Analytos Brain — COMMS graph (internal-only communications)
+// Cedar boundary: no agent role has ANY grant here. Only humans
+// (reviewers/admins) and the ingest pipeline can touch it.
+// This is how "content-agent must never see EmailThread nodes"
+// is enforced at the ENGINE, not in prompt text.
+// ─────────────────────────────────────────────────────────────
+
+node EmailThread {
+    slug: String @key
+    subject: String @index
+    summary: String?
+    internal_only: Bool
+    participants: [String]?
+    // Soft references into the knowledge graph (Product.slug / Decision.slug).
+    // Resolvable only by principals holding grants on BOTH graphs (humans).
+    product_refs: [String]?
+    decision_refs: [String]?
+    started_at: DateTime?
+    source_doc: String @index
+    ingest_run: String @index
+    extracted_at: DateTime
+    updated_at: DateTime
+}
+
+node EmailMessage {
+    slug: String @key
+    thread_slug: String @index
+    seq: I32
+    sender: String @index
+    recipients: [String]?
+    sent_at: DateTime?
+    body: String
+    extracted_at: DateTime
+    updated_at: DateTime
+}
+
+node Person {
+    slug: String @key
+    name: String @index
+    email: String? @index
+    org: String?
+    role: String?
+    is_internal: Bool?
+    source_doc: String @index
+    ingest_run: String @index
+    extracted_at: DateTime
+    updated_at: DateTime
+}
+
+node SourceDoc {
+    slug: String @key
+    filename: String @index
+    title: String?
+    doc_type: enum(product_doc, icp_doc, email_thread, other)
+    content_sha256: String @index
+    ingest_run: String @index
+    ingested_at: DateTime
+    updated_at: DateTime
+}
+
+// ── Edges ────────────────────────────────────────────────────
+
+edge InThread: EmailMessage -> EmailThread @card(1..1) { @unique(src) }
+edge SentBy: EmailMessage -> Person { @unique(src, dst) }
+edge ParticipatesIn: Person -> EmailThread { @unique(src, dst) }

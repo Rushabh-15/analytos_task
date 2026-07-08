@@ -1,0 +1,74 @@
+# Declarative Cedar tests for the KNOWLEDGE graph.
+# Run: omnigraph policy test --cluster cluster --graph knowledge --tests cluster/policies/knowledge.tests.yaml
+version: 1
+cases:
+  # Governance spine
+  - id: ingest-cannot-merge-to-main
+    actor: act-ingest
+    action: branch_merge
+    target_branch: main
+    expect: deny
+  - id: reviewer-can-merge-to-main
+    actor: act-reviewer
+    action: branch_merge
+    target_branch: main
+    expect: allow
+  - id: content-agent-cannot-merge-to-main
+    actor: act-content
+    action: branch_merge
+    target_branch: main
+    expect: deny
+  - id: ingest-can-create-review-branch
+    actor: act-ingest
+    action: branch_create
+    target_branch: ingest/run-001
+    expect: allow
+  - id: ingest-can-write-review-branch
+    actor: act-ingest
+    action: change
+    branch: ingest/run-001
+    expect: allow
+  - id: ingest-cannot-write-main
+    actor: act-ingest
+    action: change
+    branch: main
+    expect: deny
+
+  # Agents read approved knowledge only
+  - id: content-agent-reads-main
+    actor: act-content
+    action: read
+    branch: main
+    expect: allow
+  - id: content-agent-cannot-read-unreviewed-branch
+    actor: act-content
+    action: read
+    branch: ingest/run-001
+    expect: deny
+  - id: gtm-agent-reads-main
+    actor: act-gtm
+    action: read
+    branch: main
+    expect: allow
+  - id: gtm-agent-can-export
+    actor: act-gtm
+    action: export
+    branch: main
+    expect: allow
+  - id: content-agent-cannot-export
+    actor: act-content
+    action: export
+    branch: main
+    expect: deny
+
+  # Schema stays admin-only
+  - id: reviewer-cannot-apply-schema
+    actor: act-reviewer
+    action: schema_apply
+    target_branch: main
+    expect: deny
+  - id: admin-can-apply-schema
+    actor: act-admin
+    action: schema_apply
+    target_branch: main
+    expect: allow

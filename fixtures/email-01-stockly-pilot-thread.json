@@ -1,0 +1,101 @@
+{
+  "doc_type": "email_thread",
+  "title": "Stockly pilot — week 12 readout",
+  "products": [],
+  "features": [],
+  "proof_points": [
+    {
+      "product": "Stockly",
+      "feature": null,
+      "claim": "A mid-market US grocery chain reported the pilot's waste reduction alone covers the subscription several times over",
+      "metric_name": "roi_multiple",
+      "metric_value": "several times subscription cost",
+      "numeric_value": null,
+      "unit": null,
+      "timeframe": "12-week pilot",
+      "evidence_type": "customer_quote",
+      "context": "Stated by the client's VP Supply Chain after the executive readout.",
+      "client_safe": true
+    },
+    {
+      "product": "Stockly",
+      "feature": null,
+      "claim": "Pilot client's shrink baseline was 6.2% of fresh revenue, amplifying the observed waste-reduction impact",
+      "metric_name": "client_shrink_baseline",
+      "metric_value": "6.2%",
+      "numeric_value": 6.2,
+      "unit": "percent of fresh revenue",
+      "timeframe": "pre-pilot baseline",
+      "evidence_type": "pilot_result",
+      "context": "Client explicitly asked that this figure not be quoted externally.",
+      "client_safe": false
+    }
+  ],
+  "segments": [],
+  "personas": [],
+  "competitors": [],
+  "people": [
+    {
+      "name": "Priya Sharma",
+      "email": "priya@analytos.ai",
+      "org": "Analytos",
+      "role": "Account Executive",
+      "is_internal": true
+    },
+    {
+      "name": "Maya Iyer",
+      "email": "maya@analytos.ai",
+      "org": "Analytos",
+      "role": "Head of Product",
+      "is_internal": true
+    },
+    {
+      "name": "Daniel Reyes",
+      "email": "daniel.reyes@greencartmarkets.example",
+      "org": "GreenCart Markets",
+      "role": "VP Supply Chain",
+      "is_internal": false
+    }
+  ],
+  "decisions": [
+    {
+      "summary": "Expand the Stockly pilot from 12 to 40 stores at a mid-market US grocery chain, effective July 1, 2026",
+      "status": "decided",
+      "decided_at": "2026-05-14T08:20:00Z",
+      "rationale": "Pilot exceeded targets (38% waste reduction, WMAPE 41%→22%, 9.4 hrs/week saved, stockouts −27%); client conditioned expansion on markdown optimizer for flagship stores and Analytos-run onboarding, both approved.",
+      "products": ["Stockly"],
+      "decided_by": ["Priya Sharma", "Maya Iyer", "Daniel Reyes"]
+    }
+  ],
+  "thread": {
+    "subject": "Stockly pilot — week 12 readout",
+    "summary": "Final 12-store pilot readout to GreenCart Markets; exec team satisfied; expansion to 40 stores agreed conditional on markdown optimizer + Analytos-run onboarding.",
+    "internal_only": false,
+    "started_at": "2026-05-12T09:30:00Z",
+    "participants": ["priya@analytos.ai", "daniel.reyes@greencartmarkets.example", "maya@analytos.ai"],
+    "product_refs": ["Stockly"],
+    "messages": [
+      {
+        "seq": 1,
+        "sender": "priya@analytos.ai",
+        "recipients": ["daniel.reyes@greencartmarkets.example", "maya@analytos.ai"],
+        "sent_at": "2026-05-12T09:30:00Z",
+        "body": "Hi Daniel,\n\nFinal readout from the 12-store pilot is in. Headlines:\n\n- Fresh-produce waste down 38% vs. your Q4 baseline.\n- WMAPE improved from 41% to 22% at SKU-store level.\n- Store teams report 9.4 hours/week saved on ordering.\n- Stockouts on the top-200 SKUs down 27%.\n\nOne number we'd keep between us: your shrink baseline of 6.2% of fresh revenue is what made the 38% swing so large — I'd rather we not quote the 6.2% externally.\n\nDeck attached. Can we grab 30 minutes Thursday to talk expansion?\n\nPriya"
+      },
+      {
+        "seq": 2,
+        "sender": "daniel.reyes@greencartmarkets.example",
+        "recipients": ["priya@analytos.ai", "maya@analytos.ai"],
+        "sent_at": "2026-05-13T16:05:00Z",
+        "body": "Priya,\n\nNumbers landed well with our exec team — the waste reduction alone covers the subscription several times over. Two asks before we sign expansion:\n\n1. Markdown optimizer switched on for the flagship stores.\n2. Your team runs onboarding for the next tranche; ours is stretched.\n\nIf yes to both, I'm ready to take the pilot from 12 to 40 stores starting July 1st.\n\nDaniel"
+      },
+      {
+        "seq": 3,
+        "sender": "priya@analytos.ai",
+        "recipients": ["daniel.reyes@greencartmarkets.example", "maya@analytos.ai"],
+        "sent_at": "2026-05-14T08:20:00Z",
+        "body": "Done on both. Maya has approved a dedicated onboarding pod for the 28 new stores, and markdown optimizer ships to your flagships next sprint.\n\nDecision confirmed on our side: expand the Stockly pilot from 12 to 40 stores effective July 1, 2026. I'll send the order form today.\n\nPriya"
+      }
+    ]
+  }
+}

@@ -1,0 +1,47 @@
+# Analytos Brain — hosted stack.
+#   docker compose --env-file .env -f deploy/docker-compose.yml up --build -d
+# Exposes:
+#   :8080 Omnigraph HTTP API (bearer-token auth) — agents + MCP talk here
+#   :8000 Review console (HTTP Basic auth)      — humans review here
+services:
+  omnigraph:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.server
+    environment:
+      OMNIGRAPH_SERVER_BEARER_TOKENS_JSON: >-
+        {"act-admin":"${TOK_ADMIN}","act-reviewer":"${TOK_REVIEWER}","act-ingest":"${TOK_INGEST}","act-content":"${TOK_CONTENT}","act-gtm":"${TOK_GTM}"}
+      OMNIGRAPH_EMBED_PROVIDER: ${OMNIGRAPH_EMBED_PROVIDER:-mock}
+      OMNIGRAPH_EMBED_MODEL: ${OMNIGRAPH_EMBED_MODEL:-}
+      OMNIGRAPH_EMBED_BASE_URL: ${OMNIGRAPH_EMBED_BASE_URL:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    volumes:
+      - omnigraph-data:/data
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8080/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    restart: unless-stopped
+
+  app:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.app
+    environment:
+      OMNIGRAPH_BASE_URL: http://omnigraph:8080
+      OMNIGRAPH_TOKEN_REVIEWER: ${TOK_REVIEWER}
+      APP_USER: ${APP_USER:-reviewer}
+      APP_PASSWORD: ${APP_PASSWORD:?set APP_PASSWORD in .env}
+    ports:
+      - "8000:8000"
+    depends_on:
+      omnigraph:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  omnigraph-data:

@@ -1,0 +1,164 @@
+// ─────────────────────────────────────────────────────────────
+// Analytos Brain — KNOWLEDGE graph (approved company knowledge)
+// Agents (content, gtm) may read this graph on `main` only.
+// Design notes:
+//   * All temporal fields are DateTime (never Date) to avoid the
+//     JSONL Date-as-epoch-days footgun on `omnigraph load`.
+//   * Every extracted node carries structural provenance:
+//     source_doc (SourceDoc.slug) + ingest_run + extracted_at.
+//   * Every edge is @unique(src, dst) so `load --mode merge`
+//     re-runs are idempotent (no duplicate edges).
+//   * Embeddings are pipeline-computed into a plain Vector column
+//     (no @embed) so `load --mode merge` stays authoritative.
+// ─────────────────────────────────────────────────────────────
+
+node Product {
+    slug: String @key
+    name: String @index
+    tagline: String?
+    description: String?
+    category: String?
+    stage: enum(live, pilot, beta, concept)?
+    website: String?
+    source_doc: String @index
+    ingest_run: String @index
+    extracted_at: DateTime
+    updated_at: DateTime
+}
+
+node Feature {
+    slug: String @key
+    name: String @index
+    description: String?
+    differentiator: Bool?
+    source_doc: String @index
+    ingest_run: String @index
+    extracted_at: DateTime
+    updated_at: DateTime
+}
+
+// Metrics live here as STRUCTURED proof points, never prose blobs.
+node ProofPoint {
+    slug: String @key
+    claim: String @index
+    metric_name: String?
+    metric_value: String?
+    numeric_value: F64?
+    unit: String?
+    timeframe: String?
+    evidence_type: enum(pilot_result, benchmark, customer_quote, case_study, internal_estimate)?
+    context: String?
+    client_safe: Bool
+    source_doc: String @index
+    ingest_run: String @index
+    extracted_at: DateTime
+    updated_at: DateTime
+}
+
+node ICPSegment {
+    slug: String @key
+    name: String @index
+    description: String?
+    industries: [String]?
+    company_size: String?
+    geographies: [String]?
+    tech_stack_signals: [String]?
+    trigger_signals: [String]?
+    pain_points: [String]?
+    disqualifiers: [String]?
+    source_doc: String @index
+    ingest_run: String @index
+    extracted_at: DateTime
+    updated_at: DateTime
+}
+
+node Persona {
+    slug: String @key
+    title: String @index
+    seniority: String?
+    department: String?
+    buying_role: enum(champion, economic_buyer, end_user, influencer, blocker)?
+    goals: [String]?
+    pain_points: [String]?
+    objections: [String]?
+    source_doc: String @index
+    ingest_run: String @index
+    extracted_at: DateTime
+    updated_at: DateTime
+}
+
+node Person {
+    slug: String @key
+    name: String @index
+    email: String? @index
+    org: String?
+    role: String?
+    is_internal: Bool?
+    source_doc: String @index
+    ingest_run: String @index
+    extracted_at: DateTime
+    updated_at: DateTime
+}
+
+node Decision {
+    slug: String @key
+    summary: String @index
+    status: enum(decided, proposed, revisited, rejected)?
+    decided_at: DateTime?
+    rationale: String?
+    // Soft cross-graph reference into the comms graph (EmailThread.slug).
+    // Kept as a reference, not an edge: comms is a separate Cedar-scoped
+    // graph, so agents holding only knowledge-graph grants can see THAT a
+    // decision has a source thread without being able to read it.
+    thread_ref: String?
+    source_doc: String @index
+    ingest_run: String @index
+    extracted_at: DateTime
+    updated_at: DateTime
+}
+
+node Competitor {
+    slug: String @key
+    name: String @index
+    notes: String?
+    displacement_angle: String?
+    source_doc: String @index
+    ingest_run: String @index
+    extracted_at: DateTime
+    updated_at: DateTime
+}
+
+// One row per ingested file — the idempotency anchor.
+node SourceDoc {
+    slug: String @key
+    filename: String @index
+    title: String?
+    doc_type: enum(product_doc, icp_doc, email_thread, other)
+    content_sha256: String @index
+    ingest_run: String @index
+    ingested_at: DateTime
+    updated_at: DateTime
+}
+
+// Retrieval substrate for hybrid (vector + BM25) search.
+node Chunk {
+    slug: String @key
+    text: String @index
+    chunk_index: I32
+    doc_slug: String @index
+    embedding: Vector(768) @index
+    extracted_at: DateTime
+    updated_at: DateTime
+}
+
+// ── Edges ────────────────────────────────────────────────────
+
+edge HasFeature: Product -> Feature { @unique(src, dst) }
+edge ProvenBy: Product -> ProofPoint { @unique(src, dst) }
+edge Supports: ProofPoint -> Feature { @unique(src, dst) }
+edge Targets: Product -> ICPSegment { @unique(src, dst) }
+edge SegmentPersona: ICPSegment -> Persona { @unique(src, dst) }
+edge CompetesWith: Product -> Competitor { @unique(src, dst) }
+edge About: Decision -> Product { @unique(src, dst) }
+edge DecidedBy: Decision -> Person { @unique(src, dst) }
+edge ChunkOf: Chunk -> SourceDoc @card(1..1) { @unique(src) }

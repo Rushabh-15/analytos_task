@@ -1,0 +1,120 @@
+# Cedar policy — KNOWLEDGE graph.
+# Allow-only model: anything not granted here is denied (default-deny).
+# The governance spine:
+#   * `main` is protected. branch_merge into protected is granted ONLY to
+#     reviewers — no ingest run or agent write can land on main without a
+#     human approval, enforced by the engine itself.
+#   * Agents may read PROTECTED branches only (i.e. main) — they can never
+#     peek at un-reviewed ingest/* branches.
+#   * The ingest pipeline can create and write unprotected branches, and
+#     read (idempotency checks), but cannot merge.
+version: 1
+
+groups:
+  admins: [act-admin]
+  reviewers: [act-reviewer, act-admin]
+  ingestors: [act-ingest]
+  content_agents: [act-content]
+  gtm_agents: [act-gtm]
+
+protected_branches:
+  - main
+
+rules:
+  # ── Humans ──────────────────────────────────────────────
+  - id: reviewers-read-anywhere
+    allow:
+      actors: { group: reviewers }
+      actions: [read, export]
+      branch_scope: any
+
+  - id: reviewers-write-unprotected
+    allow:
+      actors: { group: reviewers }
+      actions: [change]
+      branch_scope: unprotected
+
+  - id: admins-write-anywhere
+    allow:
+      actors: { group: admins }
+      actions: [change]
+      branch_scope: any
+
+  - id: reviewers-manage-branches
+    allow:
+      actors: { group: reviewers }
+      actions: [branch_create, branch_delete]
+      target_branch_scope: any
+
+  - id: reviewers-approve-merges          # ← THE human approval gate
+    allow:
+      actors: { group: reviewers }
+      actions: [branch_merge]
+      target_branch_scope: protected
+
+  - id: reviewers-merge-between-branches
+    allow:
+      actors: { group: reviewers }
+      actions: [branch_merge]
+      target_branch_scope: unprotected
+
+  - id: reviewers-invoke-stored-queries
+    allow:
+      actors: { group: reviewers }
+      actions: [invoke_query]
+
+  - id: admins-schema-apply
+    allow:
+      actors: { group: admins }
+      actions: [schema_apply]
+      target_branch_scope: protected
+
+  # ── Ingestion pipeline ─────────────────────────────────
+  - id: ingest-read-for-idempotency
+    allow:
+      actors: { group: ingestors }
+      actions: [read]
+      branch_scope: any
+
+  - id: ingest-write-branches-only
+    allow:
+      actors: { group: ingestors }
+      actions: [change]
+      branch_scope: unprotected
+
+  - id: ingest-create-branches
+    allow:
+      actors: { group: ingestors }
+      actions: [branch_create]
+      target_branch_scope: unprotected
+  # NOTE: no branch_merge grant → the pipeline can propose, never publish.
+
+  # ── Content agent: approved knowledge only ─────────────
+  - id: content-agent-read-approved-only
+    allow:
+      actors: { group: content_agents }
+      actions: [read]
+      branch_scope: protected
+
+  - id: content-agent-invoke-stored-queries
+    allow:
+      actors: { group: content_agents }
+      actions: [invoke_query]
+
+  # ── GTM agent: approved knowledge + bulk export ────────
+  - id: gtm-agent-read-approved-only
+    allow:
+      actors: { group: gtm_agents }
+      actions: [read]
+      branch_scope: protected
+
+  - id: gtm-agent-invoke-stored-queries
+    allow:
+      actors: { group: gtm_agents }
+      actions: [invoke_query]
+
+  - id: gtm-agent-bulk-export             # capability the content agent lacks
+    allow:
+      actors: { group: gtm_agents }
+      actions: [export]
+      branch_scope: protected

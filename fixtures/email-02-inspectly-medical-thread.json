@@ -1,0 +1,88 @@
+{
+  "doc_type": "email_thread",
+  "title": "Inspectly pilot results + rollout scope",
+  "products": [],
+  "features": [],
+  "proof_points": [
+    {
+      "product": "Inspectly",
+      "feature": null,
+      "claim": "A European medical-device manufacturer's quality council validated the pilot results and moved to production rollout",
+      "metric_name": null,
+      "metric_value": null,
+      "numeric_value": null,
+      "unit": null,
+      "timeframe": "8-week pilot review",
+      "evidence_type": "case_study",
+      "context": "Quality council review preceded a scoped ISO 13485 production rollout.",
+      "client_safe": true
+    }
+  ],
+  "segments": [],
+  "personas": [],
+  "competitors": [],
+  "people": [
+    {
+      "name": "Lena Vogel",
+      "email": "lena.vogel@mednovadevices.example",
+      "org": "MedNova Devices",
+      "role": "Head of Quality",
+      "is_internal": false
+    },
+    {
+      "name": "Arjun Mehta",
+      "email": "arjun@analytos.ai",
+      "org": "Analytos",
+      "role": "Solutions Lead",
+      "is_internal": true
+    },
+    {
+      "name": "Maya Iyer",
+      "email": "maya@analytos.ai",
+      "org": "Analytos",
+      "role": "Head of Product",
+      "is_internal": true
+    }
+  ],
+  "decisions": [
+    {
+      "summary": "Proceed with an ISO 13485-scoped Inspectly production rollout at a European medical-device manufacturer's primary plant (incoming + in-process QC), go-live August 15, 2026",
+      "status": "decided",
+      "decided_at": "2026-06-05T14:55:00Z",
+      "rationale": "Pilot met all quality-council criteria (cycle time −52%, 3.1x defect catch, doc compliance 78%→96%); Analytos committed an IQ/OQ/PQ validation pack mapped to ISO 13485 clause 7.5.6 and contractual EU-only data residency; contingent on signed data-residency addendum. Client must not be named in marketing until a reference agreement is in place.",
+      "products": ["Inspectly"],
+      "decided_by": ["Lena Vogel", "Arjun Mehta"]
+    }
+  ],
+  "thread": {
+    "subject": "Inspectly pilot results + rollout scope",
+    "summary": "MedNova Devices' quality council confirmed pilot results at the Stuttgart plant and agreed to a scoped ISO 13485 production rollout, contingent on the CSV pack and EU-only data-residency addendum. Client asked not to be named in marketing yet.",
+    "internal_only": false,
+    "started_at": "2026-06-02T10:15:00Z",
+    "participants": ["lena.vogel@mednovadevices.example", "arjun@analytos.ai", "maya@analytos.ai"],
+    "product_refs": ["Inspectly"],
+    "messages": [
+      {
+        "seq": 1,
+        "sender": "lena.vogel@mednovadevices.example",
+        "recipients": ["arjun@analytos.ai"],
+        "sent_at": "2026-06-02T10:15:00Z",
+        "body": "Arjun,\n\nOur quality council reviewed the 8-week pilot at the Stuttgart plant:\n\n- Inspection cycle time down 52% across incoming and in-process QC.\n- 3.1x more defects caught per audit vs. our paper process.\n- First-pass documentation compliance up from 78% to 96%.\n\nThe council's remaining concern is software validation: we operate under ISO 13485 and need your CSV pack plus a data-residency commitment (EU-only processing) before any production rollout.\n\nLena"
+      },
+      {
+        "seq": 2,
+        "sender": "arjun@analytos.ai",
+        "recipients": ["lena.vogel@mednovadevices.example", "maya@analytos.ai"],
+        "sent_at": "2026-06-03T09:40:00Z",
+        "body": "Lena,\n\nBoth are covered: our IQ/OQ/PQ validation pack maps to ISO 13485 clause 7.5.6, and we can pin all processing to our Frankfurt region. Maya (cc'd, Head of Product) confirms EU-only residency is contractual, not best-effort.\n\nProposal: production rollout scoped to incoming inspection and in-process QC at Stuttgart first, success criteria mirroring the pilot metrics, go-live August 15.\n\nArjun"
+      },
+      {
+        "seq": 3,
+        "sender": "lena.vogel@mednovadevices.example",
+        "recipients": ["arjun@analytos.ai", "maya@analytos.ai"],
+        "sent_at": "2026-06-05T14:55:00Z",
+        "body": "Agreed. Decision from our side: proceed with the ISO 13485-scoped Inspectly rollout at the Stuttgart plant, incoming + in-process QC, go-live August 15, 2026, contingent on the signed data-residency addendum.\n\nPlease avoid naming us in any marketing material until the reference agreement is in place.\n\nLena"
+      }
+    ]
+  }
+}

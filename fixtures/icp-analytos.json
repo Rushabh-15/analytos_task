@@ -1,0 +1,124 @@
+{
+  "doc_type": "icp_doc",
+  "title": "Analytos — Ideal Customer Profiles",
+  "products": [],
+  "features": [],
+  "proof_points": [],
+  "segments": [
+    {
+      "name": "Mid-market grocery & convenience retail",
+      "description": "US and UK grocery, convenience and specialty-food chains with a high perishables mix (>25% of revenue), thin margins and no in-house data-science team.",
+      "industries": ["Grocery retail", "Convenience retail", "Specialty food"],
+      "company_size": "30–400 stores, $50M–$1.5B revenue",
+      "geographies": ["United States", "United Kingdom"],
+      "tech_stack_signals": ["Modern cloud POS (NCR, Toshiba, Square for Retail)", "Spreadsheet or legacy demand planner for ordering"],
+      "trigger_signals": ["New VP Supply Chain hired", "Shrink flagged in earnings or board decks", "Fresh/prepared-foods expansion", "Supplier consolidation project", "ESG or food-waste reporting commitments"],
+      "pain_points": ["Produce waste", "Chronic stockouts on top movers", "Store managers spending mornings on manual ordering", "Markdown decisions made by gut feel"],
+      "disqualifiers": ["Fewer than 10 stores", "Franchise models where stores order independently", "Chains mid-way through a full ERP re-platform"],
+      "target_products": ["Stockly"]
+    },
+    {
+      "name": "Regulated manufacturing & med-device QA",
+      "description": "European and North American medical-device, pharma-packaging and precision manufacturers operating under ISO 13485 / FDA 21 CFR 820 regimes.",
+      "industries": ["Medical devices", "Pharma packaging", "Precision manufacturing"],
+      "company_size": "200–5,000 employees",
+      "geographies": ["Europe", "North America"],
+      "tech_stack_signals": ["eQMS in place or Excel-based QC records", "Tablets on the floor", "Recent audit findings on documentation"],
+      "trigger_signals": ["Failed or with-observations audit", "New Head of Quality", "CAPA backlog growth", "Expansion of incoming-inspection volume", "New product line entering validation"],
+      "pain_points": ["Inspection bottlenecks", "Inconsistent records across inspectors", "Audit-prep fire drills", "Defects escaping to the field"],
+      "disqualifiers": ["Job shops under 100 employees", "Sites with no tablets or cameras banned on the floor"],
+      "target_products": ["Inspectly"]
+    }
+  ],
+  "personas": [
+    {
+      "segment": "Mid-market grocery & convenience retail",
+      "title": "VP Supply Chain / Merchandising",
+      "seniority": "VP",
+      "department": "Supply Chain",
+      "buying_role": "economic_buyer",
+      "goals": ["Cut shrink", "Raise availability", "Defend margin"],
+      "pain_points": ["Waste eroding thin margins", "No forecasting talent in-house"],
+      "objections": ["Another forecasting tool", "Integration effort", "Trust in AI-generated orders"]
+    },
+    {
+      "segment": "Mid-market grocery & convenience retail",
+      "title": "Store Operations Manager",
+      "seniority": "Manager",
+      "department": "Store Operations",
+      "buying_role": "end_user",
+      "goals": ["Shorter ordering routine", "Fewer emergency orders"],
+      "pain_points": ["Mornings lost to manual ordering"],
+      "objections": ["Change fatigue", "Tablet-in-hand workflow disruption"]
+    },
+    {
+      "segment": "Mid-market grocery & convenience retail",
+      "title": "Head of Data / IT",
+      "seniority": "Head",
+      "department": "IT",
+      "buying_role": "influencer",
+      "goals": ["No new ERP project", "Clean security review"],
+      "pain_points": ["Vendor sprawl"],
+      "objections": ["Data-sharing scope", "SSO requirements"]
+    },
+    {
+      "segment": "Regulated manufacturing & med-device QA",
+      "title": "Head of Quality / Regulatory Affairs",
+      "seniority": "Head",
+      "department": "Quality",
+      "buying_role": "economic_buyer",
+      "goals": ["Pass audits with zero majors", "Cut cost of quality"],
+      "pain_points": ["Audit-prep fire drills", "Documentation rework"],
+      "objections": ["Validation burden for new software (CSV)", "Data residency"]
+    },
+    {
+      "segment": "Regulated manufacturing & med-device QA",
+      "title": "Field / Line Inspection Lead",
+      "seniority": "Lead",
+      "department": "Quality",
+      "buying_role": "champion",
+      "goals": ["Less paperwork", "Faster shifts", "Defensible records"],
+      "pain_points": ["Paper records rejected by auditors"],
+      "objections": ["Camera reliability", "Glove-friendly UX"]
+    },
+    {
+      "segment": "Regulated manufacturing & med-device QA",
+      "title": "Plant Manager",
+      "seniority": "Manager",
+      "department": "Operations",
+      "buying_role": "influencer",
+      "goals": ["Throughput", "Fewer re-inspections"],
+      "pain_points": ["QC bottlenecks slow the line"],
+      "objections": ["Line downtime during rollout"]
+    }
+  ],
+  "competitors": [
+    {
+      "product": "Stockly",
+      "name": "ForecastIQ",
+      "notes": "Warehouse-level forecasts; ignores expiry.",
+      "displacement_angle": "Perishables-first modeling, live in weeks not quarters."
+    },
+    {
+      "product": "Stockly",
+      "name": "ShelfSense",
+      "notes": "Shelf cameras only; no replenishment.",
+      "displacement_angle": "Forecast-to-PO loop, not just shelf monitoring."
+    },
+    {
+      "product": "Inspectly",
+      "name": "AuditTrail Pro",
+      "notes": "Document control, no vision.",
+      "displacement_angle": "Defect detection plus regulator-ready records in one."
+    },
+    {
+      "product": "Inspectly",
+      "name": "ClipboardX",
+      "notes": "Checklist digitizer, non-compliant free-text records.",
+      "displacement_angle": "Structured, SOP-mapped records auditors accept."
+    }
+  ],
+  "people": [],
+  "decisions": [],
+  "thread": null
+}

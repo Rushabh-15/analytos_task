@@ -1,0 +1,113 @@
+{
+  "doc_type": "product_doc",
+  "title": "Inspectly — Product Overview",
+  "products": [
+    {
+      "name": "Inspectly",
+      "tagline": "AI field inspections with audit-ready documentation.",
+      "description": "Inspection copilot for regulated manufacturing and medical-device quality teams. Inspectors capture photos, voice notes and checklists on a tablet; vision models flag defects, auto-fill the inspection record and produce an SOP-mapped audit trail (ISO 13485 / FDA 21 CFR Part 820 templates included).",
+      "category": "Quality & inspection management",
+      "stage": "live",
+      "website": "https://analytos.ai/inspectly"
+    }
+  ],
+  "features": [
+    {
+      "product": "Inspectly",
+      "name": "Vision defect detection",
+      "description": "On-device models flag scratches, weld porosity, label misprints and seal defects in real time; fine-tunes on the customer's own defect library within days.",
+      "differentiator": true
+    },
+    {
+      "product": "Inspectly",
+      "name": "Voice-to-record",
+      "description": "Inspector dictates findings; Inspectly writes the structured, regulator-expected record with photo evidence pinned to each finding.",
+      "differentiator": false
+    },
+    {
+      "product": "Inspectly",
+      "name": "SOP-mapped audit trail",
+      "description": "Every record links to the SOP clause it satisfies; export packs generated per audit scope.",
+      "differentiator": false
+    },
+    {
+      "product": "Inspectly",
+      "name": "Re-inspection routing",
+      "description": "Failed items automatically open CAPA-linked re-inspection tasks with due dates.",
+      "differentiator": false
+    }
+  ],
+  "proof_points": [
+    {
+      "product": "Inspectly",
+      "feature": "Vision defect detection",
+      "claim": "Cut inspection cycle time by 52% at a European medical-device manufacturer",
+      "metric_name": "cycle_time_reduction",
+      "metric_value": "52%",
+      "numeric_value": 52,
+      "unit": "percent",
+      "timeframe": "8-week pilot",
+      "evidence_type": "pilot_result",
+      "context": "Across incoming and in-process QC.",
+      "client_safe": true
+    },
+    {
+      "product": "Inspectly",
+      "feature": "Vision defect detection",
+      "claim": "Caught 3.1x more defects per audit than the previous paper process",
+      "metric_name": "defect_catch_multiplier",
+      "metric_value": "3.1x",
+      "numeric_value": 3.1,
+      "unit": "x",
+      "timeframe": "8-week pilot",
+      "evidence_type": "pilot_result",
+      "context": "Versus the manufacturer's prior paper-based inspections.",
+      "client_safe": true
+    },
+    {
+      "product": "Inspectly",
+      "feature": "SOP-mapped audit trail",
+      "claim": "Raised first-pass documentation compliance from 78% to 96%",
+      "metric_name": "first_pass_doc_compliance",
+      "metric_value": "78% → 96%",
+      "numeric_value": 96,
+      "unit": "percent",
+      "timeframe": "8-week pilot",
+      "evidence_type": "pilot_result",
+      "context": "Share of inspection records accepted without rework.",
+      "client_safe": true
+    },
+    {
+      "product": "Inspectly",
+      "feature": "Re-inspection routing",
+      "claim": "Customers typically see about a 40% reduction in re-inspection site visits",
+      "metric_name": "reinspection_visit_reduction",
+      "metric_value": "~40%",
+      "numeric_value": 40,
+      "unit": "percent",
+      "timeframe": null,
+      "evidence_type": "internal_estimate",
+      "context": "Once CAPA routing is enabled.",
+      "client_safe": true
+    }
+  ],
+  "segments": [],
+  "personas": [],
+  "competitors": [
+    {
+      "product": "Inspectly",
+      "name": "AuditTrail Pro",
+      "notes": "Strong on document control; no vision capability.",
+      "displacement_angle": "Defect detection plus compliant records in one product."
+    },
+    {
+      "product": "Inspectly",
+      "name": "ClipboardX",
+      "notes": "Digitizes checklists but produces free-text records auditors reject.",
+      "displacement_angle": "Regulator-ready structured records with photo evidence."
+    }
+  ],
+  "people": [],
+  "decisions": [],
+  "thread": null
+}

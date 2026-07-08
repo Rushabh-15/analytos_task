@@ -1,0 +1,74 @@
+# Cedar policy — COMMS graph (internal email threads).
+# NO agent group appears in this file. Under Omnigraph's default-deny
+# posture that means act-content and act-gtm get 403 on every action
+# against this graph — the demonstrable "agents cannot see EmailThread
+# nodes" guarantee.
+version: 1
+
+groups:
+  admins: [act-admin]
+  reviewers: [act-reviewer, act-admin]
+  ingestors: [act-ingest]
+
+protected_branches:
+  - main
+
+rules:
+  - id: reviewers-read-anywhere
+    allow:
+      actors: { group: reviewers }
+      actions: [read, export]
+      branch_scope: any
+
+  - id: reviewers-write-unprotected
+    allow:
+      actors: { group: reviewers }
+      actions: [change]
+      branch_scope: unprotected
+
+  - id: admins-write-anywhere
+    allow:
+      actors: { group: admins }
+      actions: [change]
+      branch_scope: any
+
+  - id: reviewers-manage-branches
+    allow:
+      actors: { group: reviewers }
+      actions: [branch_create, branch_delete]
+      target_branch_scope: any
+
+  - id: reviewers-approve-merges
+    allow:
+      actors: { group: reviewers }
+      actions: [branch_merge]
+      target_branch_scope: protected
+
+  - id: reviewers-invoke-stored-queries
+    allow:
+      actors: { group: reviewers }
+      actions: [invoke_query]
+
+  - id: admins-schema-apply
+    allow:
+      actors: { group: admins }
+      actions: [schema_apply]
+      target_branch_scope: protected
+
+  - id: ingest-read-for-idempotency
+    allow:
+      actors: { group: ingestors }
+      actions: [read]
+      branch_scope: any
+
+  - id: ingest-write-branches-only
+    allow:
+      actors: { group: ingestors }
+      actions: [change]
+      branch_scope: unprotected
+
+  - id: ingest-create-branches
+    allow:
+      actors: { group: ingestors }
+      actions: [branch_create]
+      target_branch_scope: unprotected

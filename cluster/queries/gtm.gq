@@ -1,0 +1,35 @@
+// GTM reads — segments, personas, prospecting angles.
+
+query list_segments() @description("List all ICP segments.") {
+    match { $s: ICPSegment }
+    return { $s.slug, $s.name, $s.description, $s.industries, $s.company_size, $s.geographies }
+    order { $s.name }
+}
+
+query get_segment($slug: String) @description("Full ICP segment: firmographics, trigger signals, pain points, disqualifiers.") {
+    match { $s: ICPSegment { slug: $slug } }
+    return { $s.slug, $s.name, $s.description, $s.industries, $s.company_size, $s.geographies, $s.tech_stack_signals, $s.trigger_signals, $s.pain_points, $s.disqualifiers, $s.source_doc }
+}
+
+query segment_personas($slug: String) @description("Buyer personas attached to an ICP segment (SegmentPersona edges).") {
+    match {
+        $s: ICPSegment { slug: $slug }
+        $s segmentPersona $per
+    }
+    return { $per.slug, $per.title, $per.seniority, $per.department, $per.buying_role, $per.goals, $per.pain_points, $per.objections }
+}
+
+query segment_products($slug: String) @description("Products that target a given ICP segment.") {
+    match {
+        $s: ICPSegment { slug: $slug }
+        $p: Product
+        $p targets $s
+    }
+    return { $p.slug, $p.name, $p.tagline }
+}
+
+query list_personas() @description("List all buyer personas.") {
+    match { $per: Persona }
+    return { $per.slug, $per.title, $per.seniority, $per.department, $per.buying_role }
+    order { $per.title }
+}

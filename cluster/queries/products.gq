@@ -1,0 +1,54 @@
+// Product reads — the content agent's primary surface.
+
+query list_products() @description("List all products with taglines and lifecycle stage.") {
+    match { $p: Product }
+    return { $p.slug, $p.name, $p.tagline, $p.stage, $p.category }
+    order { $p.name }
+}
+
+query get_product($slug: String) @description("Fetch one product by slug, with full description and provenance.") {
+    match { $p: Product { slug: $slug } }
+    return { $p.slug, $p.name, $p.tagline, $p.description, $p.category, $p.stage, $p.website, $p.source_doc }
+}
+
+query product_features($slug: String) @description("Features of a product (HasFeature edges).") {
+    match {
+        $p: Product { slug: $slug }
+        $p hasFeature $f
+    }
+    return { $f.slug, $f.name, $f.description, $f.differentiator }
+    order { $f.name }
+}
+
+query product_proofpoints($slug: String) @description("Structured proof points and metrics proving a product's value (ProvenBy edges). client_safe=false items must never appear in external content.") {
+    match {
+        $p: Product { slug: $slug }
+        $p provenBy $pp
+    }
+    return { $pp.slug, $pp.claim, $pp.metric_name, $pp.metric_value, $pp.numeric_value, $pp.unit, $pp.timeframe, $pp.evidence_type, $pp.context, $pp.client_safe, $pp.source_doc }
+}
+
+query feature_proofpoints($slug: String) @description("Proof points that support a specific feature (Supports edges).") {
+    match {
+        $f: Feature { slug: $slug }
+        $pp: ProofPoint
+        $pp supports $f
+    }
+    return { $pp.slug, $pp.claim, $pp.metric_value, $pp.unit, $pp.client_safe }
+}
+
+query product_segments($slug: String) @description("ICP segments a product targets (Targets edges).") {
+    match {
+        $p: Product { slug: $slug }
+        $p targets $s
+    }
+    return { $s.slug, $s.name, $s.description, $s.industries, $s.company_size }
+}
+
+query product_competitors($slug: String) @description("Competitors and displacement angles for a product (CompetesWith edges).") {
+    match {
+        $p: Product { slug: $slug }
+        $p competesWith $c
+    }
+    return { $c.slug, $c.name, $c.notes, $c.displacement_angle }
+}

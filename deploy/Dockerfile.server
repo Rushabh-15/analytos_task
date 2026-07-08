@@ -1,0 +1,26 @@
+# Omnigraph server + Analytos Brain cluster.
+# Installs the official binaries via ModernRelay's install script, copies the
+# declarative cluster in, and on boot: validate → import → plan → apply
+# (as act-admin) → serve. Data persists in the /data volume.
+FROM ubuntu:24.04
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        ca-certificates curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Official installer (see github.com/ModernRelay/omnigraph). Pin a version by
+# setting OMNIGRAPH_VERSION as a build arg if you need reproducibility.
+ARG OMNIGRAPH_VERSION=latest
+RUN curl -fsSL https://raw.githubusercontent.com/ModernRelay/omnigraph/main/scripts/install.sh \
+    | sh -s -- ${OMNIGRAPH_VERSION:+--version $OMNIGRAPH_VERSION} \
+    && (command -v omnigraph || cp -f /root/.omnigraph/bin/* /usr/local/bin/ 2>/dev/null || true) \
+    && omnigraph --version && omnigraph-server --version
+
+COPY cluster /opt/cluster
+COPY deploy/server-entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+VOLUME /data
+EXPOSE 8080
+ENV OMNIGRAPH_BIND=0.0.0.0:8080
+ENTRYPOINT ["/entrypoint.sh"]

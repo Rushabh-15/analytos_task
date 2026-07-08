@@ -1,0 +1,28 @@
+// Provenance & idempotency support.
+
+query sourcedoc_by_hash($h: String) @description("Look up an ingested source document by content hash — the pipeline's idempotency check.") {
+    match { $d: SourceDoc { content_sha256: $h } }
+    return { $d.slug, $d.filename, $d.doc_type, $d.content_sha256, $d.ingest_run, $d.ingested_at }
+}
+
+query list_source_docs() @description("Recently ingested source documents, newest first.") {
+    match { $d: SourceDoc }
+    return { $d.slug, $d.filename, $d.title, $d.doc_type, $d.ingest_run, $d.ingested_at }
+    order { $d.ingested_at desc }
+    limit 50
+}
+
+query chunks_of_doc($slug: String) @description("All chunks extracted from one source document.") {
+    match {
+        $doc: SourceDoc { slug: $slug }
+        $c: Chunk
+        $c chunkOf $doc
+    }
+    return { $c.slug, $c.chunk_index, $c.text }
+    order { $c.chunk_index }
+}
+
+query entities_from_run($run: String) @description("Products extracted by a given ingest run — spot-check an ingestion.") {
+    match { $p: Product { ingest_run: $run } }
+    return { $p.slug, $p.name, $p.source_doc }
+}

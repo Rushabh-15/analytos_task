@@ -1,0 +1,31 @@
+// Decision log reads — governed institutional memory.
+
+query list_decisions() @description("All recorded decisions, most recent first.") {
+    match { $d: Decision }
+    return { $d.slug, $d.summary, $d.status, $d.decided_at, $d.thread_ref }
+    order { $d.decided_at desc }
+    limit 100
+}
+
+query get_decision($slug: String) @description("One decision with rationale and provenance. thread_ref points into the comms graph and is resolvable only by humans.") {
+    match { $d: Decision { slug: $slug } }
+    return { $d.slug, $d.summary, $d.status, $d.decided_at, $d.rationale, $d.thread_ref, $d.source_doc }
+}
+
+query decisions_about_product($slug: String) @description("Decisions concerning a given product (About edges).") {
+    match {
+        $p: Product { slug: $slug }
+        $d: Decision
+        $d about $p
+    }
+    return { $d.slug, $d.summary, $d.status, $d.decided_at }
+    order { $d.decided_at desc }
+}
+
+query decision_makers($slug: String) @description("Who made a decision (DecidedBy edges).") {
+    match {
+        $d: Decision { slug: $slug }
+        $d decidedBy $per
+    }
+    return { $per.slug, $per.name, $per.role, $per.org }
+}

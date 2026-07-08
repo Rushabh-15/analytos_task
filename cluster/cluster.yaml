@@ -1,0 +1,55 @@
+# Analytos Brain — Omnigraph cluster declaration
+# The whole deployment is this folder: schemas, stored queries, Cedar
+# policies, and (optionally) an S3 storage root. `omnigraph cluster apply`
+# converges it; `omnigraph-server --cluster .` serves it.
+version: 1
+
+metadata:
+  name: analytos-brain
+
+state:
+  backend: cluster
+  lock: true
+
+# Local dev: storage defaults to this directory (graphs/<id>.omni).
+# Hosted: uncomment to put the ledger + graph roots on any S3-compatible
+# bucket (RustFS / MinIO / AWS S3 / R2). Credentials come from AWS_* env.
+# storage: s3://analytos-brain/clusters/prod
+
+providers:
+  embedding:
+    # Query-time embedder for `nearest($chunk.embedding, $q)`.
+    # `mock` is deterministic and keyless — perfect for local dev/CI.
+    # For the hosted demo, switch kind/model and export the key; the
+    # ingestion pipeline reads the SAME env (EMBED_* in .env) so stored
+    # vectors and query vectors share one model / one vector space.
+    default:
+      kind: mock
+    # default:
+    #   kind: gemini
+    #   model: gemini-embedding-2
+    #   api_key: ${GEMINI_API_KEY}
+    # default:
+    #   kind: openai
+    #   model: text-embedding-3-small
+    #   api_key: ${OPENAI_API_KEY}
+
+graphs:
+  knowledge:
+    schema: knowledge.pg
+    queries: queries/
+    embedding_provider: default
+  comms:
+    schema: comms.pg
+    queries: queries-comms/
+
+policies:
+  knowledge:
+    file: policies/knowledge.policy.yaml
+    applies_to: [knowledge]
+  comms:
+    file: policies/comms.policy.yaml
+    applies_to: [comms]
+  server:
+    file: policies/server.policy.yaml
+    applies_to: [cluster]

@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Analytos Brain — Review Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#101418; --panel:#161c23; --panel2:#1b232c; --line:#28323d;
+  --ink:#e9eef3; --muted:#8b98a5; --accent:#7c9cf5;
+  --ok:#3fb27f; --warn:#d29922; --bad:#e5534b;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --disp:"Space Grotesk",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:14px/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+a{color:var(--accent);text-decoration:none}
+header{display:flex;align-items:center;gap:14px;padding:14px 22px;
+  border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:5}
+.wordmark{font-family:var(--disp);font-weight:700;font-size:17px;letter-spacing:.12em}
+.wordmark small{display:block;font:11px var(--mono);color:var(--muted);
+  letter-spacing:.18em;font-weight:400;margin-top:1px}
+.spacer{flex:1}
+.chip{font:12px var(--mono);border:1px solid var(--line);border-radius:6px;
+  padding:3px 9px;color:var(--muted);display:inline-flex;align-items:center;gap:6px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--bad)}
+.dot.ok{background:var(--ok)}
+nav{display:flex;gap:4px;padding:10px 22px;border-bottom:1px solid var(--line)}
+nav button{background:none;border:0;color:var(--muted);font:600 13px var(--disp);
+  letter-spacing:.04em;padding:7px 13px;border-radius:8px;cursor:pointer}
+nav button.active{color:var(--ink);background:var(--panel2)}
+nav button:focus-visible{outline:2px solid var(--accent)}
+main{padding:22px;max-width:1180px;margin:0 auto}
+section{display:none}section.active{display:block}
+h2{font-family:var(--disp);font-size:15px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--muted);margin:22px 0 10px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+  padding:14px 16px;border-left:3px solid var(--accent)}
+.card h3{margin:0 0 6px;font:600 13px var(--disp);letter-spacing:.05em}
+.kv{font:12px var(--mono);color:var(--muted)}
+.kv b{color:var(--ink);font-weight:600}
+table{width:100%;border-collapse:collapse;background:var(--panel);
+  border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th,td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--line);
+  font-size:13px;vertical-align:top}
+th{font:600 11px var(--disp);letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);background:var(--panel2)}
+tr:last-child td{border-bottom:0}
+tbody tr{cursor:pointer}tbody tr:hover{background:var(--panel2)}
+.mono{font-family:var(--mono);font-size:12px}
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 14px}
+.pill{border:1px solid var(--line);background:var(--panel);color:var(--muted);
+  border-radius:999px;padding:4px 12px;font:12px var(--mono);cursor:pointer}
+.pill.active{color:var(--ink);border-color:var(--accent)}
+input[type=text]{width:100%;max-width:520px;background:var(--panel);
+  border:1px solid var(--line);border-radius:8px;color:var(--ink);
+  padding:10px 12px;font:13px var(--mono)}
+input[type=text]:focus{outline:2px solid var(--accent);border-color:transparent}
+button.act{border:0;border-radius:8px;padding:8px 16px;cursor:pointer;
+  font:600 13px var(--disp);letter-spacing:.03em;color:#08110c}
+.approve{background:var(--ok)}.reject{background:var(--bad);color:#1a0605}
+button.act:disabled{opacity:.5;cursor:wait}
+.badge{font:11px var(--mono);border-radius:5px;padding:2px 7px}
+.b-add{background:rgba(63,178,127,.15);color:var(--ok)}
+.b-chg{background:rgba(210,153,34,.15);color:var(--warn)}
+.b-rem{background:rgba(229,83,75,.15);color:var(--bad)}
+.b-safe{background:rgba(63,178,127,.15);color:var(--ok)}
+.b-unsafe{background:rgba(229,83,75,.15);color:var(--bad)}
+.diffrow{border-left:3px solid var(--line);background:var(--panel);
+  border:1px solid var(--line);border-radius:8px;margin:8px 0;padding:10px 14px}
+.diffrow.add{border-left-color:var(--ok)}
+.diffrow.chg{border-left-color:var(--warn)}
+.diffrow.rem{border-left-color:var(--bad)}
+.diffrow h4{margin:0 0 4px;font:600 13px var(--mono)}
+.fielddiff{font:12px var(--mono);margin:2px 0}
+.old{color:var(--bad);text-decoration:line-through}
+.new{color:var(--ok)}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(560px,92vw);
+  background:var(--panel);border-left:1px solid var(--line);z-index:20;
+  overflow:auto;padding:20px;transform:translateX(100%);transition:transform .2s}
+.drawer.open{transform:none}
+.drawer h3{font-family:var(--disp);margin:0 0 4px}
+.drawer .close{float:right;background:none;border:0;color:var(--muted);
+  font-size:20px;cursor:pointer}
+dl{display:grid;grid-template-columns:150px 1fr;gap:4px 12px;font-size:13px}
+dt{color:var(--muted);font:11px var(--mono);letter-spacing:.05em;padding-top:2px}
+dd{margin:0;word-break:break-word}
+.msg{background:var(--panel2);border:1px solid var(--line);border-radius:10px;
+  padding:10px 14px;margin:8px 0}
+.msg .from{font:600 12px var(--mono);color:var(--accent)}
+.msg .when{font:11px var(--mono);color:var(--muted)}
+.msg pre{white-space:pre-wrap;font:12px/1.6 var(--mono);margin:6px 0 0}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+  background:var(--panel2);border:1px solid var(--line);border-radius:8px;
+  padding:10px 18px;font:13px var(--mono);display:none;z-index:30;max-width:80vw}
+.empty{color:var(--muted);font:13px var(--mono);padding:18px;
+  border:1px dashed var(--line);border-radius:10px}
+.chunk{background:var(--panel);border:1px solid var(--line);border-radius:8px;
+  padding:10px 14px;margin:8px 0;font-size:13px}
+.chunk .src{font:11px var(--mono);color:var(--muted);margin-top:6px}
+@media (prefers-reduced-motion: reduce){.drawer{transition:none}}
+@media (max-width:640px){dl{grid-template-columns:1fr}main{padding:14px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wordmark">ANALYTOS BRAIN<small>GOVERNED CONTEXT LAYER</small></div>
+  <div class="spacer"></div>
+  <span class="chip"><span class="dot" id="healthdot"></span><span id="healthtxt">connecting…</span></span>
+  <span class="chip">reviews merge as <b style="color:var(--ink)">&nbsp;act-reviewer</b></span>
+</header>
+<nav id="tabs">
+  <button data-tab="overview" class="active">Overview</button>
+  <button data-tab="browse">Browse</button>
+  <button data-tab="search">Search</button>
+  <button data-tab="review">Review</button>
+  <button data-tab="activity">Activity</button>
+</nav>
+<main>
+
+<section id="overview" class="active">
+  <h2>Graphs on main</h2>
+  <div class="cards" id="ov-cards"><div class="empty">Loading…</div></div>
+  <h2>Recent changes</h2>
+  <div id="ov-commits"><div class="empty">Loading…</div></div>
+</section>
+
+<section id="browse">
+  <div class="pills" id="typepills"></div>
+  <div id="browse-table"><div class="empty">Pick an entity type.</div></div>
+</section>
+
+<section id="search">
+  <input type="text" id="q" placeholder="Hybrid search — vector + BM25 + entity match. Try: waste reduction pilot">
+  <div id="search-out" style="margin-top:16px"><div class="empty">Results appear here. Chunks are ranked by reciprocal-rank fusion of semantic and keyword scores.</div></div>
+</section>
+
+<section id="review">
+  <h2>Pending ingest branches</h2>
+  <div id="branches"><div class="empty">Loading…</div></div>
+  <div id="diffview"></div>
+</section>
+
+<section id="activity">
+  <h2>Commit log — main</h2>
+  <div id="act-commits"><div class="empty">Loading…</div></div>
+</section>
+
+</main>
+<div class="drawer" id="drawer">
+  <button class="close" onclick="closeDrawer()" aria-label="Close">×</button>
+  <div id="drawer-body"></div>
+</div>
+<div id="toast" role="status"></div>
+
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function toast(m,ms=3800){const t=$("#toast");t.textContent=m;t.style.display="block";
+  clearTimeout(t._h);t._h=setTimeout(()=>t.style.display="none",ms);}
+async function j(url,opts){const r=await fetch(url,opts);
+  if(!r.ok){let d;try{d=(await r.json()).detail}catch(e){d=r.statusText}
+    throw new Error(`${r.status}: ${typeof d==="string"?d:JSON.stringify(d)}`);}
+  return r.json();}
+function fmt(v){
+  if(v===null||v===undefined)return"<span style='color:var(--muted)'>—</span>";
+  if(Array.isArray(v))return esc(v.join(", "));
+  if(typeof v==="boolean")return v?"true":"false";
+  return esc(v);}
+function ts(v){if(!v)return"";const d=new Date(v);return isNaN(d)?esc(v):d.toISOString().replace("T"," ").slice(0,16)+"Z";}
+
+/* tabs */
+$("#tabs").addEventListener("click",e=>{
+  const b=e.target.closest("button");if(!b)return;
+  document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("active",x===b));
+  document.querySelectorAll("main section").forEach(s=>s.classList.toggle("active",s.id===b.dataset.tab));
+  if(b.dataset.tab==="review")loadBranches();
+  if(b.dataset.tab==="activity")loadActivity();
+});
+
+/* health + overview */
+(async()=>{
+  try{const h=await j("/api/health");
+    $("#healthdot").classList.add("ok");
+    $("#healthtxt").textContent="omnigraph up";
+  }catch(e){$("#healthtxt").textContent="omnigraph unreachable";}
+  loadOverview();loadBranches();
+})();
+
+async function loadOverview(){
+  try{
+    const o=await j("/api/overview");
+    $("#ov-cards").innerHTML=Object.entries(o.graphs).map(([g,s])=>{
+      const rows=Object.entries(s||{}).filter(([k,v])=>typeof v!=="object")
+        .slice(0,6).map(([k,v])=>`<div class="kv">${esc(k)}: <b>${esc(v)}</b></div>`).join("");
+      return `<div class="card"><h3>${esc(g)}</h3>${rows||'<div class="kv">empty</div>'}</div>`;
+    }).join("");
+    $("#ov-commits").innerHTML=commitTable(o.commits);
+  }catch(e){$("#ov-cards").innerHTML=`<div class="empty">${esc(e.message)}</div>`;}
+}
+function commitTable(commits){
+  if(!commits||!commits.length)return'<div class="empty">No commits yet — ingest something, then approve it.</div>';
+  const rows=commits.map(c=>{
+    const actor=c.actor||c.author||c.as||"?";
+    const msg=c.message||c.summary||c.op||"";
+    const id=(c.id||c.commit||c.hash||"").toString().slice(0,10);
+    return `<tr><td class="mono">${esc(id)}</td><td>${esc(c._graph)}</td>
+      <td class="mono">${esc(actor)}</td><td>${esc(msg)}</td>
+      <td class="mono">${ts(c.timestamp||c.created_at||c.time)}</td></tr>`;}).join("");
+  return `<table><thead><tr><th>commit</th><th>graph</th><th>actor</th><th>message</th><th>when</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+/* browse */
+let TYPES=[];
+(async()=>{
+  try{TYPES=await j("/api/types");
+    $("#typepills").innerHTML=TYPES.map(t=>
+      `<button class="pill" data-k="${esc(t.key)}">${esc(t.key)}<span style="opacity:.55">·${esc(t.graph)}</span></button>`).join("");
+  }catch(e){}
+})();
+$("#typepills").addEventListener("click",async e=>{
+  const p=e.target.closest(".pill");if(!p)return;
+  document.querySelectorAll(".pill").forEach(x=>x.classList.toggle("active",x===p));
+  const k=p.dataset.k;
+  $("#browse-table").innerHTML='<div class="empty">Loading…</div>';
+  try{
+    const rows=await j(`/api/entities/${k}`);
+    if(!rows.length){$("#browse-table").innerHTML='<div class="empty">Nothing on main yet for this type. Approve an ingest branch first.</div>';return;}
+    const cols=Object.keys(rows[0]);
+    $("#browse-table").innerHTML=`<table><thead><tr>${cols.map(c=>`<th>${esc(c)}</th>`).join("")}</tr></thead>
+      <tbody>${rows.map(r=>`<tr data-slug="${esc(r.slug)}" data-type="${esc(k)}">${
+        cols.map(c=>`<td class="${c==="slug"?"mono":""}">${c==="client_safe"?safeBadge(r[c]):fmt(r[c])}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+  }catch(e){$("#browse-table").innerHTML=`<div class="empty">${esc(e.message)}</div>`;}
+});
+function safeBadge(v){return v===false?'<span class="badge b-unsafe">client_safe=false</span>':
+  v===true?'<span class="badge b-safe">client_safe</span>':fmt(v);}
+$("#browse-table").addEventListener("click",e=>{
+  const tr=e.target.closest("tr[data-slug]");if(tr)openEntity(tr.dataset.type,tr.dataset.slug);
+});
+
+async function openEntity(type,slug){
+  const body=$("#drawer-body");
+  body.innerHTML='<div class="empty">Loading…</div>';$("#drawer").classList.add("open");
+  try{
+    if(type==="EmailThread"){return openThread(slug);}
+    const d=await j(`/api/entity/${type}/${encodeURIComponent(slug)}`);
+    let html=`<h3>${esc(type)}</h3><div class="mono" style="color:var(--muted);margin-bottom:12px">${esc(slug)}</div><dl>`;
+    for(const[k,v]of Object.entries(d.data))
+      html+=`<dt>${esc(k)}</dt><dd>${k==="client_safe"?safeBadge(v):fmt(v)}</dd>`;
+    html+=`</dl>`;
+    for(const[label,items]of Object.entries(d.neighbors||{})){
+      html+=`<h2>${esc(label)}</h2>`;
+      if(!Array.isArray(items)){html+=`<div class="empty">${esc(items.error||"")}</div>`;continue;}
+      if(!items.length){html+=`<div class="empty">none</div>`;continue;}
+      const cols=Object.keys(items[0]).slice(0,4);
+      html+=`<table><thead><tr>${cols.map(c=>`<th>${esc(c)}</th>`).join("")}</tr></thead><tbody>${
+        items.map(r=>`<tr>${cols.map(c=>`<td>${c==="client_safe"?safeBadge(r[c]):fmt(r[c])}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+    }
+    body.innerHTML=html;
+  }catch(e){body.innerHTML=`<div class="empty">${esc(e.message)}</div>`;}
+}
+async function openThread(slug){
+  const body=$("#drawer-body");
+  try{
+    const t=await j(`/api/thread/${encodeURIComponent(slug)}`);
+    let html=`<h3>${esc(t.thread.subject||slug)}</h3>
+      <div class="mono" style="color:var(--muted)">${esc(slug)}</div>
+      <p style="color:var(--muted)">${esc(t.thread.summary||"")}</p>`;
+    html+=(t.messages||[]).map(m=>`<div class="msg">
+      <span class="from">${esc(m.sender)}</span> <span class="when">${ts(m.sent_at)}</span>
+      <pre>${esc(m.body)}</pre></div>`).join("");
+    if(t.participants&&t.participants.length){
+      html+=`<h2>participants</h2>`+t.participants.map(p=>
+        `<span class="chip">${esc(p.name||p.slug)}${p.org?" · "+esc(p.org):""}</span> `).join("");
+    }
+    body.innerHTML=html;
+  }catch(e){body.innerHTML=`<div class="empty">${esc(e.message)}</div>`;}
+}
+function closeDrawer(){$("#drawer").classList.remove("open");}
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeDrawer();});
+
+/* search */
+let qTimer;
+$("#q").addEventListener("input",e=>{clearTimeout(qTimer);
+  qTimer=setTimeout(()=>runSearch(e.target.value.trim()),350);});
+async function runSearch(q){
+  if(!q){$("#search-out").innerHTML='<div class="empty">Type to search.</div>';return;}
+  $("#search-out").innerHTML='<div class="empty">Searching…</div>';
+  try{
+    const r=await j(`/api/search?q=${encodeURIComponent(q)}`);
+    let html="";
+    const ent=(label,items,render)=>{
+      const good=(items||[]).filter(x=>!x.error);
+      if(good.length)html+=`<h2>${label}</h2>`+good.map(render).join("");};
+    ent("products",r.products,p=>`<div class="chunk"><b>${esc(p.name)}</b> <span class="mono" style="color:var(--muted)">${esc(p.slug)}</span><div>${esc(p.tagline||"")}</div></div>`);
+    ent("proof points",r.proof_points,p=>`<div class="chunk">${esc(p.claim)} <b class="mono">${esc(p.metric_value||"")}</b> ${safeBadge(p.client_safe)}<div class="src mono">${esc(p.slug)}</div></div>`);
+    ent("segments",r.segments,s=>`<div class="chunk"><b>${esc(s.name)}</b><div class="src mono">${esc(s.slug)}</div></div>`);
+    ent("chunks — hybrid (RRF of nearest + BM25)",r.chunks,c=>`<div class="chunk">${esc((c.text||"").slice(0,420))}${(c.text||"").length>420?"…":""}<div class="src mono">${esc(c.doc_slug)} · ${esc(c.slug)}</div></div>`);
+    $("#search-out").innerHTML=html||'<div class="empty">No hits on main.</div>';
+  }catch(e){$("#search-out").innerHTML=`<div class="empty">${esc(e.message)}</div>`;}
+}
+
+/* review */
+async function loadBranches(){
+  try{
+    const bs=await j("/api/branches");
+    if(!bs.length){$("#branches").innerHTML='<div class="empty">No pending branches. Run the pipeline:<br>python -m pipeline.ingest seed-data/*.md</div>';$("#diffview").innerHTML="";return;}
+    $("#branches").innerHTML=`<table><thead><tr><th>branch</th><th>graphs touched</th><th></th></tr></thead><tbody>${
+      bs.map(b=>`<tr data-b="${esc(b.branch)}"><td class="mono">${esc(b.branch)}</td>
+        <td class="mono">${esc(b.graphs.join(", "))}</td>
+        <td><a>view diff →</a></td></tr>`).join("")}</tbody></table>`;
+  }catch(e){$("#branches").innerHTML=`<div class="empty">${esc(e.message)}</div>`;}
+}
+$("#branches").addEventListener("click",e=>{
+  const tr=e.target.closest("tr[data-b]");if(tr)loadDiff(tr.dataset.b);
+});
+async function loadDiff(branch){
+  $("#diffview").innerHTML='<div class="empty">Computing diff vs main…</div>';
+  try{
+    const d=await j(`/api/diff/${branch}`);
+    let html=`<h2>Diff — <span class="mono">${esc(branch)}</span> vs main</h2>
+      <div style="margin:10px 0 18px">
+        <button class="act approve" onclick="approve('${esc(branch)}',this)">Approve — merge to main</button>
+        <button class="act reject" onclick="reject('${esc(branch)}',this)" style="margin-left:8px">Reject — discard branch</button>
+      </div>`;
+    for(const[g,dd]of Object.entries(d.graphs)){
+      const c=dd.counts;
+      html+=`<h2>${esc(g)} <span class="badge b-add">+${c.added} nodes</span>
+        <span class="badge b-chg">~${c.changed}</span>
+        <span class="badge b-rem">−${c.removed}</span>
+        <span class="badge b-add">+${c.edges_added} edges</span></h2>`;
+      html+=dd.added.map(n=>{
+        const preview=Object.entries(n.data).filter(([k,v])=>v!==null&&!["slug"].includes(k))
+          .slice(0,5).map(([k,v])=>`<span class="kv">${esc(k)}=<b>${esc(String(Array.isArray(v)?v.join("|"):v).slice(0,90))}</b></span>`).join(" · ");
+        return `<div class="diffrow add"><h4>+ ${esc(n.type)} <span style="color:var(--muted)">${esc(n.slug)}</span></h4><div>${preview}</div></div>`;}).join("");
+      html+=dd.changed.map(n=>`<div class="diffrow chg"><h4>~ ${esc(n.type)} <span style="color:var(--muted)">${esc(n.slug)}</span></h4>${
+        n.fields.map(f=>`<div class="fielddiff">${esc(f.field)}: <span class="old">${esc(String(f.old).slice(0,80))}</span> → <span class="new">${esc(String(f.new).slice(0,80))}</span></div>`).join("")}</div>`).join("");
+      html+=dd.removed.map(n=>`<div class="diffrow rem"><h4>− ${esc(n.type)} <span style="color:var(--muted)">${esc(n.slug)}</span></h4></div>`).join("");
+      if(dd.edges_added.length)html+=`<div class="diffrow add"><h4>+ edges</h4><div class="mono" style="font-size:12px">${
+        dd.edges_added.map(e2=>`${esc(e2.edge)}: ${esc(e2.from)} → ${esc(e2.to)}`).join("<br>")}</div></div>`;
+    }
+    $("#diffview").innerHTML=html;
+  }catch(e){$("#diffview").innerHTML=`<div class="empty">${esc(e.message)}</div>`;}
+}
+async function approve(branch,btn){
+  if(!confirm(`Merge ${branch} into main on all graphs it touches?\nThe merge commit will be attributed to act-reviewer.`))return;
+  btn.disabled=true;
+  try{
+    const r=await j(`/api/branches/${branch}/approve`,{method:"POST"});
+    toast(`Approved ${branch} — merged to main as act-reviewer.`);
+    $("#diffview").innerHTML="";loadBranches();loadOverview();
+  }catch(e){toast("Approve failed → "+e.message,6000);}
+  btn.disabled=false;
+}
+async function reject(branch,btn){
+  if(!confirm(`Discard ${branch}? The branch and all its extracted data will be deleted. Nothing reaches main.`))return;
+  btn.disabled=true;
+  try{
+    await j(`/api/branches/${branch}/reject`,{method:"POST"});
+    toast(`Rejected ${branch} — branch deleted.`);
+    $("#diffview").innerHTML="";loadBranches();
+  }catch(e){toast("Reject failed → "+e.message,6000);}
+  btn.disabled=false;
+}
+
+/* activity */
+async function loadActivity(){
+  try{const cs=await j("/api/commits?branch=main");
+    $("#act-commits").innerHTML=commitTable(cs);
+  }catch(e){$("#act-commits").innerHTML=`<div class="empty">${esc(e.message)}</div>`;}
+}
+</script>
+</body>
+</html>

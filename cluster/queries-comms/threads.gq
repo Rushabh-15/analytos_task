@@ -1,0 +1,33 @@
+// Comms reads — HUMANS ONLY (no agent group holds grants on this graph).
+
+query list_threads() @description("All email threads, newest first.") {
+    match { $t: EmailThread }
+    return { $t.slug, $t.subject, $t.summary, $t.internal_only, $t.participants, $t.started_at }
+    order { $t.started_at desc }
+    limit 100
+}
+
+query get_thread($slug: String) @description("One email thread with soft references into the knowledge graph.") {
+    match { $t: EmailThread { slug: $slug } }
+    return { $t.slug, $t.subject, $t.summary, $t.internal_only, $t.participants, $t.product_refs, $t.decision_refs, $t.started_at, $t.source_doc }
+}
+
+query thread_messages($slug: String) @description("Messages of a thread in send order.") {
+    match { $m: EmailMessage { thread_slug: $slug } }
+    return { $m.slug, $m.seq, $m.sender, $m.recipients, $m.sent_at, $m.body }
+    order { $m.seq }
+}
+
+query thread_participants($slug: String) @description("People on a thread (ParticipatesIn edges).") {
+    match {
+        $t: EmailThread { slug: $slug }
+        $per: Person
+        $per participatesIn $t
+    }
+    return { $per.slug, $per.name, $per.email, $per.org, $per.role, $per.is_internal }
+}
+
+query comms_sourcedoc_by_hash($h: String) @description("Idempotency lookup for ingested email files.") {
+    match { $d: SourceDoc { content_sha256: $h } }
+    return { $d.slug, $d.filename, $d.ingest_run, $d.ingested_at }
+}
