@@ -20,8 +20,13 @@ fi
 cd "$CLUSTER_DIR"
 echo "▶ omnigraph cluster validate"
 omnigraph cluster validate
-echo "▶ omnigraph cluster import"
-omnigraph cluster import
+if [ -f "$CLUSTER_DIR/__cluster/state.json" ]; then
+    echo "▶ omnigraph cluster refresh (existing state)"
+    omnigraph cluster refresh
+else
+    echo "▶ omnigraph cluster import (first boot)"
+    omnigraph cluster import
+fi
 echo "▶ omnigraph cluster plan"
 omnigraph cluster plan || true
 echo "▶ omnigraph cluster apply (as act-admin)"

@@ -14,7 +14,11 @@ BIND="${OMNIGRAPH_BIND:-127.0.0.1:8080}"
 echo "── cluster: validate → import → plan → apply (as act-admin)"
 ( cd cluster
   omnigraph cluster validate
-  omnigraph cluster import
+  if [ -f __cluster/state.json ]; then
+      omnigraph cluster refresh      # existing state ledger → refresh
+  else
+      omnigraph cluster import       # first run → create initial state
+  fi
   omnigraph cluster plan || true
   omnigraph cluster apply --as act-admin )
 
