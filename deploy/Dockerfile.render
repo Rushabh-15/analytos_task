@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN curl -fsSL https://raw.githubusercontent.com/ModernRelay/omnigraph/main/scripts/install.sh -o /tmp/og-install.sh \
     && INSTALL_DIR=/usr/local/bin bash /tmp/og-install.sh \
     && rm -f /tmp/og-install.sh \
-    && omnigraph --version && omnigraph-server --version
+    && omnigraph version && omnigraph-server --help >/dev/null && echo "omnigraph CLIs OK"
 
 WORKDIR /srv
 COPY requirements.txt .
