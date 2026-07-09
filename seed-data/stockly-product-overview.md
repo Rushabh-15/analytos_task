@@ -1,45 +1,37 @@
-<!-- SAMPLE STAND-IN. Replace this file with the real seed-data/stockly-product-overview.md
-     provided in the task pack before your final run. Structure and metric style mirror
-     what the pipeline expects; fixtures/ contains the matching extraction fixture. -->
+# Stockly — Product Overview (Internal)
 
-# Stockly — Product Overview
+**Product site:** stockly.analytos.ai
+**Category:** Pull Kanban inventory intelligence for discrete manufacturing
+**Owner:** Analytos Labs product team
+**Status:** In production with pilot customers
 
-**Tagline:** Demand forecasting and auto-replenishment for perishable retail.
+## What Stockly Does
 
-Stockly is Analytos' AI inventory copilot for grocery and convenience retail.
-It ingests POS transactions, supplier lead times, weather and local-event
-signals, then produces SKU-store level demand forecasts and automatically
-drafts purchase orders that a category manager approves in one click.
+Stockly replaces manual kanban cards and replenishment spreadsheets with an AI-driven Pull Kanban engine. It continuously right-sizes kanban loops and safety stock so plants stop carrying excess inventory without risking stockouts.
 
-**Category:** Retail inventory optimization · **Stage:** live ·
-**Website:** https://analytos.ai/stockly
+## Core Features
 
-## Core features
+1. **Pull Kanban engine** — digital kanban loops per SKU/work-center, automatic card sizing and re-sizing as demand shifts.
+2. **Monte Carlo safety-stock simulation** — runs 10,000 demand/lead-time scenarios per SKU nightly to recommend optimal safety stock, instead of static min/max rules.
+3. **Demand-shift detection** — flags SKUs whose consumption pattern changed (seasonality, new customer, phase-out) and proposes loop adjustments with human approval.
+4. **ERP integration** — native connectors for NetSuite and SAP Business One; reads item masters, open POs, consumption; writes recommended reorder signals.
+5. **Autonomy tiers** — Tier 1 recommend-only, Tier 2 auto-adjust with approval, Tier 3 fully autonomous replenishment signals; every agent action is logged separately from human actions in the activity log.
+6. **Supplier lead-time intelligence** — learns actual vs. quoted lead times per supplier and feeds the simulation.
 
-- **Perishable-aware forecasting.** Shelf-life decay curves per SKU; the model
-  optimizes for sell-through before expiry, not just stock availability. This
-  is our primary differentiator versus generic demand planners.
-- **One-click replenishment.** Draft POs generated nightly per store with
-  supplier constraints (MOQs, delivery windows) already applied.
-- **Markdown optimizer.** Suggests dynamic discount timing for items
-  approaching expiry to recover margin instead of writing off waste.
-- **Shrink analytics.** Attributes waste to root causes (over-ordering,
-  delivery variance, planogram gaps) with store-level league tables.
+## Proof Points (approved for external use)
 
-## Proof points
+- Pilot at a Midwest precision machining company ($120M revenue, ~3,400 active SKUs on kanban): **21% reduction in on-hand inventory value** and **35% fewer stockout events** within 90 days.
+- Inventory planner time on replenishment reviews cut from **6 hours/week to under 1 hour/week**.
+- Typical deployment: **2-week POC, 90 days to full production** (standard Analytos model).
 
-From a 12-week pilot with a mid-market US grocery chain (12 stores):
+## Competitive Positioning
 
-- Fresh-produce waste down **38%** over the 12-week pilot.
-- Forecast error (WMAPE) improved from **41% to 22%** at SKU-store level.
-- Store teams saved **9.4 hours per week** on manual ordering.
-- Stockout rate on top-200 SKUs fell **27%**.
+Primary displacement target: **NetStock** and spreadsheet-based min/max planning. Stockly wins on Pull Kanban methodology (vs. forecast-push), Monte Carlo simulation depth, agentic autonomy tiers, and on-premises perpetual licensing option (no forced SaaS subscription — important for PE-owned plants sensitive to recurring cost).
 
-Internal benchmarks: typical deployment onboards in **under 2 weeks** because
-Stockly reads standard POS exports (no ERP integration required for phase 1).
+## Technical Stack (internal only)
 
-## Competitive context
+React front-end, Flask API, PostgreSQL, AWS. AI layer currently GPT-4.1 mini for reasoning/explanations; Monte Carlo engine is deterministic Python (not LLM).
 
-Legacy demand planners (ForecastIQ, ShelfSense) forecast at warehouse level
-and ignore expiry dynamics; Stockly wins deals on perishables-first modeling
-and speed-to-value for mid-market chains that lack data-science teams.
+## Target Buyer
+
+Plant Managers and Supply Chain Directors at mid-market discrete manufacturers; economic buyer often the CFO or PE operating partner. See ICP doc for full segmentation.

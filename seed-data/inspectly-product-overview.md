@@ -1,46 +1,36 @@
-<!-- SAMPLE STAND-IN. Replace this file with the real seed-data/inspectly-product-overview.md
-     provided in the task pack before your final run. -->
+# Inspectly — Product Overview (Internal)
 
-# Inspectly — Product Overview
+**Product site:** inspectly.analytos.ai
+**Category:** Engineering drawing → inspection plan automation
+**Owner:** Analytos Labs product team
+**Status:** In production with a medical device manufacturing customer
 
-**Tagline:** AI field inspections with audit-ready documentation.
+## What Inspectly Does
 
-Inspectly is Analytos' inspection copilot for regulated manufacturing and
-medical-device quality teams. Inspectors capture photos, voice notes and
-checklist responses on a tablet; Inspectly's vision models flag defects,
-auto-fill the inspection record, and produce an audit trail mapped to the
-customer's SOPs (ISO 13485 / FDA 21 CFR Part 820 templates included).
+Inspectly reads engineering drawings (PDF/TIFF) and automatically generates ballooned inspection plan workbooks in Excel — the documents quality engineers otherwise build by hand for every part revision. It extracts dimensions, tolerances, and GD&T callouts and maps them to inspection characteristics with measurement methods.
 
-**Category:** Quality & inspection management · **Stage:** live ·
-**Website:** https://analytos.ai/inspectly
+## Core Features
 
-## Core features
+1. **Automated dimension extraction** — vision model reads drawings and extracts dimensions, tolerances, GD&T symbols, notes, and title-block metadata.
+2. **Balloon numbering** — auto-balloons each characteristic on the drawing and keeps balloon numbers consistent across revisions.
+3. **Excel inspection plan generation** — outputs the customer's own inspection plan template (characteristic #, nominal, tolerance, method, gauge) ready for FAI/PPAP packages.
+4. **Revision diffing** — compares drawing rev B vs rev A and highlights changed characteristics only, so quality teams re-inspect what changed.
+5. **Human verification step** — every extracted plan goes to a quality engineer for review before release; corrections feed back to improve extraction.
 
-- **Vision defect detection.** On-device models flag scratches, weld
-  porosity, label misprints and seal defects in real time. Primary
-  differentiator: models fine-tune on the customer's own defect library
-  within days.
-- **Voice-to-record.** Inspector dictates findings; Inspectly writes the
-  structured record, in the regulator-expected format, with photo evidence
-  pinned to each finding.
-- **SOP-mapped audit trail.** Every record links to the SOP clause it
-  satisfies; export packs are generated per audit scope.
-- **Re-inspection routing.** Failed items automatically open CAPA-linked
-  re-inspection tasks with due dates.
+## Proof Points (approved for external use — client name NOT approved, refer to "a leading medical device manufacturer")
 
-## Proof points
+- At a leading medical device manufacturer: inspection plan creation time reduced from **4–6 hours per part to under 20 minutes**.
+- **92% first-pass dimension extraction accuracy** across the initial four production part numbers processed; remaining 8% caught in the human verification step.
+- Supports **ISO 13485 and AS9100** quality documentation contexts.
 
-From an 8-week pilot with a European medical-device manufacturer:
+## Competitive Positioning
 
-- Inspection cycle time down **52%** across incoming and in-process QC.
-- **3.1×** more defects caught per audit versus the previous paper process.
-- First-pass documentation compliance rose from **78% to 96%**.
+Alternatives are manual ballooning, or legacy tools like InspectionXpert that still require heavy manual cleanup. Inspectly differentiates on end-to-end automation with a built-in human verification loop and revision-aware diffing.
 
-Internal estimate: customers typically see about a **40%** reduction in
-re-inspection site visits once CAPA routing is enabled.
+## Technical Stack (internal only)
 
-## Competitive context
+Gemini Flash-class vision models for extraction; Python pipeline; Excel generation via openpyxl; deployed per-client (on-prem friendly).
 
-AuditTrail Pro is strong on document control but has no vision capability;
-ClipboardX digitizes checklists but produces free-text records auditors
-reject. Inspectly displaces both by pairing detection with compliant records.
+## Target Buyer
+
+Quality Managers and Quality Engineers at regulated discrete manufacturers (medical device, aerospace suppliers, precision machining). Economic buyer: Director of Quality or VP Operations. See ICP doc.

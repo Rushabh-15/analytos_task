@@ -1,64 +1,46 @@
-<!-- SAMPLE STAND-IN. Replace this file with the real seed-data/email-01-stockly-pilot-thread.md
-     provided in the task pack before your final run. Contains client names ON PURPOSE:
-     the pipeline must anonymize them before anything reaches the agent-readable graph. -->
-
-# Email thread: Stockly pilot — GreenCart Markets
+# Email Thread — Stockly Pilot Results & Next Steps (Internal, dummy data)
 
 ---
-From: Priya Sharma <priya@analytos.ai>
-To: Daniel Reyes <daniel.reyes@greencartmarkets.example>
-Cc: Maya Iyer <maya@analytos.ai>
-Date: 2026-05-12 09:30 UTC
-Subject: Stockly pilot — week 12 readout
+**From:** Santosh Thota <santosh@analytos.ai>
+**To:** Narayan Laksham <narayan@analytos.ai>; Ashok Suthar <ashok@analytos.ai>
+**Subject:** Stockly pilot — 90-day numbers are in
+**Date:** Mon, 15 Jun 2026 09:42
 
-Hi Daniel,
+Narayan, Ashok —
 
-Final readout from the 12-store pilot is in. Headlines:
+Final 90-day readout from the precision machining pilot:
 
-- Fresh-produce waste down 38% vs. your Q4 baseline.
-- WMAPE improved from 41% to 22% at SKU-store level.
-- Store teams report 9.4 hours/week saved on ordering.
-- Stockouts on the top-200 SKUs down 27%.
+- On-hand inventory value down 21% (target was 15%, so we beat it)
+- Stockout events down 35%
+- Planner replenishment review time: 6 hrs/week → 55 min/week
+- 3,412 SKUs live on digital kanban loops, Monte Carlo sim running nightly in ~14 min
 
-One number we'd keep between us: your shrink baseline of 6.2% of fresh
-revenue is what made the 38% swing so large — I'd rather we not quote the
-6.2% externally.
+Two learnings worth capturing: (1) the demand-shift detector caught a phase-out SKU the planner had missed — that alone freed ~$85K of dead stock; (2) plant floor adoption only clicked after we turned on Tier 2 autonomy (auto-adjust with approval). Tier 1 recommend-only was getting ignored.
 
-Deck attached. Can we grab 30 minutes Thursday to talk expansion?
-
-Priya
+Santosh
 
 ---
-From: Daniel Reyes <daniel.reyes@greencartmarkets.example>
-To: Priya Sharma <priya@analytos.ai>
-Cc: Maya Iyer <maya@analytos.ai>
-Date: 2026-05-13 16:05 UTC
-Subject: RE: Stockly pilot — week 12 readout
+**From:** Narayan Laksham <narayan@analytos.ai>
+**To:** Santosh Thota; Ashok Suthar
+**Subject:** RE: Stockly pilot — 90-day numbers are in
+**Date:** Mon, 15 Jun 2026 11:17
 
-Priya,
+Great numbers. Three asks:
 
-Numbers landed well with our exec team — the waste reduction alone covers
-the subscription several times over. Two asks before we sign expansion:
+1. These proof points are approved for external use — but keep the client anonymous ("Midwest precision machining company, $120M revenue"). Never name them in content.
+2. Marketing angle I want us to push: "Pull Kanban + Monte Carlo beats forecast-push planning" — direct contrast against NetStock's approach. That's our displacement wedge.
+3. For PE conversations, lead with working capital release: 21% of inventory value on a $120M manufacturer is real EBITDA-adjacent money. Perpetual license framing lands well there — no new recurring SaaS line on the P&L.
 
-1. Markdown optimizer switched on for the flagship stores.
-2. Your team runs onboarding for the next tranche; ours is stretched.
+Also — next pilot candidates should be NetSuite shops first. SAP B1 integration took 3 weeks vs 1 week for NetSuite; let's not repeat that on a POC clock.
 
-If yes to both, I'm ready to take the pilot from 12 to 40 stores starting
-July 1st.
-
-Daniel
+Narayan
 
 ---
-From: Priya Sharma <priya@analytos.ai>
-To: Daniel Reyes <daniel.reyes@greencartmarkets.example>
-Cc: Maya Iyer <maya@analytos.ai>
-Date: 2026-05-14 08:20 UTC
-Subject: RE: RE: Stockly pilot — week 12 readout
+**From:** Ashok Suthar <ashok@analytos.ai>
+**To:** Narayan Laksham; Santosh Thota
+**Subject:** RE: RE: Stockly pilot — 90-day numbers are in
+**Date:** Mon, 15 Jun 2026 14:03
 
-Done on both. Maya has approved a dedicated onboarding pod for the 28 new
-stores, and markdown optimizer ships to your flagships next sprint.
+Noted. One more for the knowledge base: the supplier lead-time module found quoted vs actual lead time gaps averaging 9 days on the top 50 suppliers. That's feeding the sim now and is a great demo moment — buyers don't believe their own supplier data until they see it.
 
-Decision confirmed on our side: expand the Stockly pilot from 12 to 40
-stores effective July 1, 2026. I'll send the order form today.
-
-Priya
+Ashok
