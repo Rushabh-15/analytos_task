@@ -61,6 +61,12 @@ rules:
       actions: [read]
       branch_scope: any
 
+  - id: ingest-export-main-for-diff
+    allow:
+      actors: { group: ingestors }
+      actions: [export]
+      branch_scope: protected
+
   - id: ingest-write-branches-only
     allow:
       actors: { group: ingestors }

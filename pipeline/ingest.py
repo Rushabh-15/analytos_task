@@ -35,7 +35,7 @@ from typing import Optional
 from .embeddings import Embedder
 from .extract import extract, provider_name
 from .model import ExtractionResult
-from .og_client import OGClient, OGError
+from .og_client import OGClient, OGError, OGError
 
 KNOWLEDGE = "knowledge"
 COMMS = "comms"
@@ -100,6 +100,37 @@ class Rows:
         rows += [json.dumps(r, ensure_ascii=False) for r in self.edges.values()]
         return rows
 
+    def delta_against(self, existing_rows: list[dict]) -> "Rows":
+        """Return a NEW Rows holding only what differs from `existing_rows`
+        (an export of the base branch). Edges already present are dropped
+        entirely (any re-insert of a @unique(src,dst) tuple is a hard error,
+        not a no-op). Nodes are dropped only when byte-identical on the
+        content fields; changed nodes are kept so merge upserts them."""
+        VOLATILE = {"updated_at", "extracted_at", "ingested_at", "ingest_run"}
+        have_nodes: dict[tuple, dict] = {}
+        have_edges: set[tuple] = set()
+        for r in existing_rows:
+            if "type" in r:
+                d = r.get("data", {})
+                have_nodes[(r["type"], d.get("slug"))] = d
+            elif "edge" in r:
+                have_edges.add((r["edge"], r.get("from"), r.get("to")))
+
+        def content(d: dict) -> dict:
+            return {k: v for k, v in d.items() if k not in VOLATILE}
+
+        out = Rows()
+        for key, row in self.nodes.items():
+            old = have_nodes.get(key)
+            if old is not None and content(old) == content(row["data"]):
+                continue  # unchanged — skip
+            out.nodes[key] = row
+        for key, row in self.edges.items():
+            if key in have_edges:
+                continue  # already on base branch — never re-insert
+            out.edges[key] = row
+        return out
+
     def counts(self) -> dict:
         by: dict[str, int] = {}
         for (t, _), _r in self.nodes.items():
@@ -161,7 +192,7 @@ class Mapper:
                   "ingested_at": self.ts, "updated_at": self.ts}
 
         target = self.c if x.doc_type == "email_thread" else self.k
-        target.node("SourceDoc", dict(srcdoc))
+        target.node("CommsSourceDoc" if x.doc_type == "email_thread" else "SourceDoc", dict(srcdoc))
 
         # knowledge entities can come from ANY doc type (emails yield
         # decisions/proof points); if any do, register provenance there too.
@@ -254,7 +285,7 @@ class Mapper:
             if person.is_internal:
                 self.k.node("Person", dict(row))
             if x.doc_type == "email_thread":
-                self.c.node("Person", dict(row))
+                self.c.node("CommsPerson", dict(row))
 
         for d in x.decisions:
             dslug = f"dec-{h8(d.summary)}"
@@ -414,10 +445,24 @@ def main(argv: Optional[list[str]] = None) -> int:
         print("  ✓ dry-run / nothing new — no branch created")
         return 0
 
-    for graph, rows in ((KNOWLEDGE, k_rows), (COMMS, c_rows)):
-        if not rows:
+    for graph, accum in ((KNOWLEDGE, mapper.k), (COMMS, mapper.c)):
+        full = accum.ndjson()
+        if not full:
             continue
-        print(f"  ⇡ loading {len(rows)} rows onto {graph}@{branch} (mode=merge, from=main)")
+        # delta vs base branch: drop pre-existing edges (unique) + identical nodes
+        try:
+            base = og.export(graph, branch="main")
+        except OGError as e:
+            print(f"  ⚠ {graph}: export of main failed ({e}); "
+                  f"proceeding without delta filter (loads may retry).")
+            base = []
+        delta = accum.delta_against(base)
+        rows = delta.ndjson()
+        if not rows:
+            print(f"  ✓ {graph}: nothing new vs main (all {len(full)} rows already present) — skipping load")
+            continue
+        print(f"  ⇡ loading {len(rows)} new/changed rows onto {graph}@{branch} "
+              f"(of {len(full)} mapped; mode=merge, from=main)")
         res = og.load(graph, rows, branch=branch, from_branch="main", mode="merge")
         print(f"    → {json.dumps(res)[:200]}")
 

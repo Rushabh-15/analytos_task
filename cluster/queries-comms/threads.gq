@@ -21,13 +21,13 @@ query thread_messages($slug: String) @description("Messages of a thread in send 
 query thread_participants($slug: String) @description("People on a thread (ParticipatesIn edges).") {
     match {
         $t: EmailThread { slug: $slug }
-        $per: Person
+        $per: CommsPerson
         $per participatesIn $t
     }
     return { $per.slug, $per.name, $per.email, $per.org, $per.role, $per.is_internal }
 }
 
 query comms_sourcedoc_by_hash($h: String) @description("Idempotency lookup for ingested email files.") {
-    match { $d: SourceDoc { content_sha256: $h } }
+    match { $d: CommsSourceDoc { content_sha256: $h } }
     return { $d.slug, $d.filename, $d.ingest_run, $d.ingested_at }
 }

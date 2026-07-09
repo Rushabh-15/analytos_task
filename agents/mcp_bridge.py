@@ -32,7 +32,13 @@ class MCPBridgeError(RuntimeError):
 
 
 class OmnigraphMCP:
-    """Sync-friendly wrapper around one omnigraph-mcp stdio server."""
+    """Per-call-atomic wrapper around @modernrelay/omnigraph-mcp.
+
+    Each tool call opens a fresh MCP stdio session, runs one call, and closes
+    it — entirely within a single coroutine driven by asyncio.run(). This keeps
+    anyio's cancel scopes intact (enter+exit on the same task) and needs no
+    background threads or persistent session juggling.
+    """
 
     def __init__(self, graph_id: str, token: Optional[str],
                  base_url: Optional[str] = None, default_branch: str = "main"):
@@ -41,27 +47,24 @@ class OmnigraphMCP:
         self.base_url = base_url or os.getenv("OMNIGRAPH_BASE_URL",
                                               "http://127.0.0.1:8080")
         self.default_branch = default_branch
-        self._stack: Optional[AsyncExitStack] = None
-        self._session: Optional[ClientSession] = None
-        self._loop = asyncio.new_event_loop()
 
-    # ── lifecycle ────────────────────────────────────────
+    # context-manager surface kept so agents can still use `with ...:`
     def __enter__(self) -> "OmnigraphMCP":
-        self._loop.run_until_complete(self._start())
-        return self
-
-    def __exit__(self, *exc) -> None:
-        try:
-            self._loop.run_until_complete(self._stop())
-        finally:
-            self._loop.close()
-
-    async def _start(self) -> None:
-        npx = shutil.which("npx")
-        if not npx:
+        # fail fast if npx is missing, with a clear message
+        if not shutil.which("npx"):
             raise MCPBridgeError(
                 "npx not found — install Node.js 18+; agents talk to Omnigraph "
                 "via `npx -y @modernrelay/omnigraph-mcp`.")
+        return self
+
+    def __exit__(self, *exc) -> None:
+        return None
+
+    def _server_params(self) -> StdioServerParameters:
+        npx = shutil.which("npx")
+        if not npx:
+            raise MCPBridgeError(
+                "npx not found — install Node.js 18+ to run the MCP server.")
         env = {
             **os.environ,
             "OMNIGRAPH_BASE_URL": self.base_url,
@@ -70,42 +73,39 @@ class OmnigraphMCP:
         }
         if self.token:
             env["OMNIGRAPH_TOKEN"] = self.token
-        params = StdioServerParameters(
+        return StdioServerParameters(
             command=npx, args=["-y", "@modernrelay/omnigraph-mcp"], env=env)
-        self._stack = AsyncExitStack()
-        read, write = await self._stack.enter_async_context(stdio_client(params))
-        self._session = await self._stack.enter_async_context(
-            ClientSession(read, write))
-        await self._session.initialize()
 
-    async def _stop(self) -> None:
-        if self._stack:
-            await self._stack.aclose()
+    async def _one_shot(self, tool: str, args: dict) -> Any:
+        """Open session -> initialize -> call one tool -> close, all in one task."""
+        async with stdio_client(self._server_params()) as (read, write):
+            async with ClientSession(read, write) as session:
+                await session.initialize()
+                result = await session.call_tool(tool, args)
+                texts = [c.text for c in result.content
+                         if getattr(c, "type", None) == "text"]
+                payload = "\n".join(texts).strip()
+                if getattr(result, "isError", False):
+                    raise MCPBridgeError(payload or f"MCP tool {tool} failed")
+                try:
+                    return json.loads(payload)
+                except (json.JSONDecodeError, TypeError):
+                    return payload
 
-    # ── core call ────────────────────────────────────────
+    async def _one_shot_list(self) -> list[str]:
+        async with stdio_client(self._server_params()) as (read, write):
+            async with ClientSession(read, write) as session:
+                await session.initialize()
+                res = await session.list_tools()
+                return [t.name for t in res.tools]
+
+    # ── public API (unchanged signatures) ────────────────
     def call(self, tool: str, args: dict) -> Any:
-        return self._loop.run_until_complete(self._call(tool, args))
-
-    async def _call(self, tool: str, args: dict) -> Any:
-        assert self._session, "bridge not started"
-        result = await self._session.call_tool(tool, args)
-        texts = [c.text for c in result.content
-                 if getattr(c, "type", None) == "text"]
-        payload = "\n".join(texts).strip()
-        if getattr(result, "isError", False):
-            raise MCPBridgeError(payload or f"MCP tool {tool} failed")
-        try:
-            return json.loads(payload)
-        except (json.JSONDecodeError, TypeError):
-            return payload
+        return asyncio.run(self._one_shot(tool, args))
 
     def list_tools(self) -> list[str]:
-        async def _lt():
-            res = await self._session.list_tools()
-            return [t.name for t in res.tools]
-        return self._loop.run_until_complete(_lt())
+        return asyncio.run(self._one_shot_list())
 
-    # ── curated reads (canned GQ mirroring cluster/queries) ─
     def query(self, gq: str, params: Optional[dict] = None,
               branch: Optional[str] = None) -> list[dict]:
         args: dict[str, Any] = {"query": gq}

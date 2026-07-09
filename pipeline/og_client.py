@@ -21,6 +21,16 @@ class OGError(RuntimeError):
         self.url = url
 
 
+def _is_edge(line: str) -> bool:
+    """True if this NDJSON line is an edge row ({\"edge\":...}) rather
+    than a node row ({\"type\":...})."""
+    import json as _json
+    try:
+        return "edge" in _json.loads(line)
+    except Exception:
+        return False
+
+
 @dataclass
 class OGClient:
     base_url: str
@@ -82,24 +92,72 @@ class OGClient:
 
     def export(self, graph: str, branch: str = "main",
                type_names: Optional[list[str]] = None) -> list[dict]:
+        """Buffered + retry export. Reads the whole NDJSON body (no streaming)
+        and retries transient premature-stream / chunk-decode drops, which the
+        Omnigraph docs flag as expected 504-class flakiness."""
+        import time as _time
         body: dict = {"branch": branch}
         if type_names:
             body["type_names"] = type_names
-        r = self._req("POST", f"/graphs/{graph}/export", json_body=body, stream=True)
-        rows: list[dict] = []
-        for line in r.iter_lines():
-            if line:
-                rows.append(json.loads(line))
-        return rows
+        url = f"{self.base_url.rstrip('/')}/graphs/{graph}/export"
+        last_err: Optional[Exception] = None
+        for attempt in range(3):
+            try:
+                r = requests.request("POST", url, headers=self._headers(),
+                                     json=body, timeout=self.timeout, stream=False)
+                if r.status_code >= 400:
+                    raise OGError(r.status_code, r.text[:2000], url)
+                text = r.text
+                rows: list[dict] = []
+                for line in text.splitlines():
+                    line = line.strip()
+                    if line:
+                        rows.append(json.loads(line))
+                return rows
+            except OGError:
+                raise  # a real 4xx/5xx status is not a transient read drop
+            except Exception as e:  # ChunkedEncodingError, ProtocolError, ConnErr
+                last_err = e
+                _time.sleep(0.6 * (attempt + 1))
+        raise OGError(0, f"export failed after retries: {last_err}", url)
 
     # ── writes (Cedar-gated server-side) ────────────────────
-    def load(self, graph: str, ndjson_lines: Iterable[str], *,
-             branch: str, from_branch: Optional[str] = None,
-             mode: str = "merge") -> Any:
+    def _load_raw(self, graph: str, ndjson_lines: Iterable[str], *,
+                  branch: str, from_branch: Optional[str] = None,
+                  mode: str = "merge") -> Any:
         body: dict = {"data": "\n".join(ndjson_lines), "branch": branch, "mode": mode}
         if from_branch:
             body["from"] = from_branch
         return self._req("POST", f"/graphs/{graph}/load", json_body=body).json()
+
+    def load(self, graph: str, ndjson_lines: Iterable[str], *,
+             branch: str, from_branch: Optional[str] = None,
+             mode: str = "merge") -> Any:
+        """Split load: nodes via merge, edges via append.
+        Nodes have @key so `merge` upserts them idempotently. Edges have no
+        @key, so `merge` would try to INSERT each one and the @unique(src,dst)
+        constraint rejects any existing tuple; `append` is the correct mode for
+        known-new rows (the pipeline's delta filter guarantees novelty).
+        The branch is forked from `from_branch` on the FIRST call that touches
+        it; subsequent calls append onto the now-existing branch.
+        """
+        lines = [l for l in ndjson_lines if l.strip()]
+        nodes, edges = [], []
+        for l in lines:
+            (edges if '"edge"' in l and _is_edge(l) else nodes).append(l)
+
+        results = {}
+        first_from = from_branch
+        if nodes:
+            results["nodes"] = self._load_raw(
+                graph, nodes, branch=branch, from_branch=first_from, mode="merge")
+            first_from = None  # branch now exists; don't re-fork
+        if edges:
+            # if there were no nodes, the branch still needs creating on this call
+            results["edges"] = self._load_raw(
+                graph, edges, branch=branch,
+                from_branch=(first_from if not nodes else None), mode="append")
+        return results or {"loaded": 0}
 
     def mutate(self, graph: str, gq: str, *, name: Optional[str] = None,
                params: Optional[dict] = None, branch: Optional[str] = None) -> Any:
@@ -113,8 +171,16 @@ class OGClient:
         return self._req("POST", f"/graphs/{graph}/mutate", json_body=body).json()
 
     # ── branches / history ──────────────────────────────────
-    def branches(self, graph: str) -> Any:
-        return self._req("GET", f"/graphs/{graph}/branches").json()
+    def branches(self, graph: str) -> list[str]:
+        raw = self._req("GET", f"/graphs/{graph}/branches").json()
+        # server returns {"branches": [...]}; tolerate a bare list or dicts too
+        items = raw.get("branches", raw) if isinstance(raw, dict) else raw
+        out = []
+        for b in (items or []):
+            name = b if isinstance(b, str) else (b.get("name") or b.get("branch"))
+            if name:
+                out.append(name)
+        return out
 
     def branch_create(self, graph: str, name: str, from_branch: str = "main") -> Any:
         return self._req("POST", f"/graphs/{graph}/branches",
@@ -127,6 +193,9 @@ class OGClient:
         return self._req("POST", f"/graphs/{graph}/branches/merge",
                          json_body={"source": source, "target": target}).json()
 
-    def commits(self, graph: str, branch: str = "main") -> Any:
-        return self._req("GET", f"/graphs/{graph}/commits",
-                         params={"branch": branch}).json()
+    def commits(self, graph: str, branch: str = "main") -> list[dict]:
+        raw = self._req("GET", f"/graphs/{graph}/commits",
+                        params={"branch": branch}).json()
+        if isinstance(raw, dict):
+            return raw.get("commits", raw.get("data", []))
+        return raw if isinstance(raw, list) else []

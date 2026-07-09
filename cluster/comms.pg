@@ -35,7 +35,7 @@ node EmailMessage {
     updated_at: DateTime
 }
 
-node Person {
+node CommsPerson {
     slug: String @key
     name: String @index
     email: String? @index
@@ -48,7 +48,7 @@ node Person {
     updated_at: DateTime
 }
 
-node SourceDoc {
+node CommsSourceDoc {
     slug: String @key
     filename: String @index
     title: String?
@@ -62,5 +62,5 @@ node SourceDoc {
 // ── Edges ────────────────────────────────────────────────────
 
 edge InThread: EmailMessage -> EmailThread @card(1..1) { @unique(src) }
-edge SentBy: EmailMessage -> Person { @unique(src, dst) }
-edge ParticipatesIn: Person -> EmailThread { @unique(src, dst) }
+edge SentBy: EmailMessage -> CommsPerson { @unique(src, dst) }
+edge ParticipatesIn: CommsPerson -> EmailThread { @unique(src, dst) }
