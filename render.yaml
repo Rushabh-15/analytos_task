@@ -7,7 +7,7 @@ services:
     runtime: docker
     dockerfilePath: ./deploy/Dockerfile.render
     plan: free
-    healthCheckPath: /api/health
+    healthCheckPath: /healthz
     envVars:
       - key: TOK_ADMIN
         sync: false
