@@ -5,12 +5,14 @@
 FROM python:3.12-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        ca-certificates curl \
+        ca-certificates curl bash tar gzip \
     && rm -rf /var/lib/apt/lists/*
 
-# Omnigraph binaries
-RUN curl -fsSL https://raw.githubusercontent.com/ModernRelay/omnigraph/main/scripts/install.sh | sh \
-    && (command -v omnigraph || cp -f /root/.omnigraph/bin/* /usr/local/bin/ 2>/dev/null || true) \
+# Omnigraph binaries — installer defaults to $HOME/.local/bin and needs bash;
+# force it to /usr/local/bin so the CLIs are on PATH for later build steps.
+RUN curl -fsSL https://raw.githubusercontent.com/ModernRelay/omnigraph/main/scripts/install.sh -o /tmp/og-install.sh \
+    && INSTALL_DIR=/usr/local/bin bash /tmp/og-install.sh \
+    && rm -f /tmp/og-install.sh \
     && omnigraph --version && omnigraph-server --version
 
 WORKDIR /srv
