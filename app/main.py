@@ -399,6 +399,13 @@ def thread(slug: str, branch: str = "main"):
             "participants": [_clean(p) for p in ppl]}
 
 
+@app.get("/healthz")
+def healthz():
+    # Unauthenticated liveness probe for Render's health check.
+    # Always 200 when the web app is up; no Basic auth, no Omnigraph dependency,
+    # so a slow or cold graph never fails the deploy.
+    return {"status": "ok"}
+
 @app.get("/api/health", dependencies=[Depends(guard)])
 def health():
     try:
