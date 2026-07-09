@@ -52,4 +52,5 @@ export OMNIGRAPH_BASE_URL="http://127.0.0.1:8080"
 export OMNIGRAPH_TOKEN_REVIEWER="${TOK_REVIEWER}"
 PORT="${PORT:-8000}"
 echo "▶ starting review console on 0.0.0.0:$PORT"
+cd /srv
 exec uvicorn app.main:app --host 0.0.0.0 --port "$PORT"
