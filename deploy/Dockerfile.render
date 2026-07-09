@@ -1,0 +1,30 @@
+# Combined image for a single Render free web service:
+# runs Omnigraph (localhost:8080) + the FastAPI review console together,
+# exposing ONLY the console on Render's assigned $PORT. Agents/MCP reach
+# Omnigraph via the same host — see deploy/HOSTING.md for the MCP note.
+FROM python:3.12-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        ca-certificates curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Omnigraph binaries
+RUN curl -fsSL https://raw.githubusercontent.com/ModernRelay/omnigraph/main/scripts/install.sh | sh \
+    && (command -v omnigraph || cp -f /root/.omnigraph/bin/* /usr/local/bin/ 2>/dev/null || true) \
+    && omnigraph --version && omnigraph-server --version
+
+WORKDIR /srv
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY cluster ./cluster
+COPY pipeline ./pipeline
+COPY app ./app
+COPY deploy/render-start.sh /render-start.sh
+RUN chmod +x /render-start.sh
+
+# graph data persists here (attach a Render disk at /data for durability)
+ENV CLUSTER_DIR=/data/cluster
+VOLUME /data
+
+CMD ["/render-start.sh"]
